@@ -16,7 +16,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 CROP = (700, 400, 256, 256)
 
 ENCODERS = ["etcpak", "etc2comp_e100", "rg_etc1_hq", "basisu_full",
-            "basisu_full_perc", "basisu_v3_corners_perc", "etcpack_slow"]
+            "basisu_full_perc", "basisu_v3_corners_perc"]
 
 LABEL_H = 24
 

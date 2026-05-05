@@ -79,24 +79,23 @@ Python 3 with skimage/PIL/numpy.
 
 ```bash
 # Clone upstream encoders into encoders/
+# (ETCPACK / Ericsson reference dropped — too slow, non-OSI license, no
+# quality advantage over rg_etc1 / basisu cluster fit on real content.)
 git clone https://github.com/BinomialLLC/basis_universal.git encoders/basis_universal
 git clone https://github.com/wolfpld/etcpak.git encoders/etcpak
 git clone https://github.com/google/etc2comp.git encoders/etc2comp
-git clone https://github.com/Ericsson/ETCPACK.git encoders/ETCPACK
 git clone https://github.com/richgel999/rg-etc1.git encoders/rg-etc1
 curl -sL https://raw.githubusercontent.com/nothings/stb/master/stb_image.h -o encoders/stb_image.h
 curl -sL https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h -o encoders/stb_image_write.h
 
 # Apply our patches
 patch -p0 -d encoders/basis_universal < patches/0001-try-all-corners.patch
-cp patches/etcpack_linux.cxx encoders/ETCPACK/source/etcpack.cxx
 
 # Build encoders (etcpak needs CMake 3.20+; lower minimum if needed)
 mkdir -p build/{etcpak,etc2comp,basisu}
 (cd build/etc2comp && cmake ../../encoders/etc2comp -DCMAKE_BUILD_TYPE=Release && make -j)
 (cd build/etcpak && cmake ../../encoders/etcpak -DCMAKE_BUILD_TYPE=Release && make -j)
 (cd build/basisu && cmake ../../encoders/basis_universal -DCMAKE_BUILD_TYPE=Release && make -j)
-(cd encoders/ETCPACK/source && g++ -O3 -w etcpack.cxx etcdec.cxx image.cxx -o ../../../build/etcpack -lm)
 
 # Build our drivers
 g++ -O3 -fopenmp -Iencoders -Iencoders encoders/rg_etc1_tool.cpp encoders/rg-etc1/rg_etc1.cpp -o build/rg_etc1_tool

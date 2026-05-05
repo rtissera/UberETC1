@@ -18,6 +18,13 @@ Y / BT.601 luma) and SSIM (Y) computed in a neutral Python skimage script.
 **all 36 (image × encoder) pairs** — `mean_abs_diff = 0.000000`. So PSNR
 numbers below are the exact values the GPU will produce.
 
+**ETCPACK (Ericsson reference) dropped** from active comparison: at >50 s
+per 1920×1080 image (single-threaded, no path to parallelize because of
+its `tmp.ppm` global file usage), it delivered PSNR within 0.05 dB of
+rg_etc1 / basisu cluster fit on the two images that completed. Not worth
+the integration cost given its non-OSI Ericsson license. Quality reference
+role goes to rg_etc1 instead.
+
 ## Mean across 6 images, sorted by PSNR_Y (perceptual)
 
 | Encoder | PSNR_RGB (dB) | PSNR_Y (dB) | SSIM_Y | Time (s) | Threads |
@@ -30,7 +37,6 @@ numbers below are the exact values the GPU will produce.
 | basisu_v3_corners (try-all-corners RGB) | 39.015 | 42.045 | 0.9879 | 5.04 | 32 |
 | etcpak | 35.879 | 39.718 | 0.9670 | 0.04 | 32 |
 
-(ETCPACK reference encoder: appended once its slow single-threaded run completes.)
 
 ## Per-image breakdown (RGB PSNR / Y PSNR / Y SSIM)
 

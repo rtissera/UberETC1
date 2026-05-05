@@ -19,7 +19,6 @@ EXTRACT = ROOT / "extract_blocks.py"
 # Mapping of encoder -> name of bitstream file inside decoded/<image>__<encoder>/
 BITSTREAM = {
     "etcpak": "out.pvr",
-    "etcpack_slow": "out.pkm",
     "etc2comp_e100": "out.ktx",
     "rg_etc1_hq": "out.bin",          # already raw
     "basisu_full": "out.bin",

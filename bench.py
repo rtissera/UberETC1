@@ -29,8 +29,11 @@ RESULTS = ROOT / "results"
 RESULTS.mkdir(exist_ok=True)
 
 ENCODERS = {
+    # ETCPACK (Ericsson reference) intentionally omitted: too slow for the
+    # quality it delivers, and licensed under a non-OSI Ericsson license that
+    # complicates downstream use. Both rg_etc1 cHighQuality and basisu cluster
+    # fit match or beat its quality at >50x the throughput.
     "etcpak":      str(BUILD / "etcpak/etcpak"),
-    "etcpack_slow": str(BUILD / "etcpack"),
     "etc2comp_e100": str(BUILD / "etc2comp/EtcTool/EtcTool"),
     "rg_etc1_hq":  str(BUILD / "rg_etc1_tool"),
     "basisu_full": str(BUILD / "basisu_etc1_tool"),
@@ -55,19 +58,6 @@ def encode_decode(name, src_png, work_dir):
         _, t_enc = run([ENCODERS["etcpak"], "-c", "etc1", str(src_png), str(pvr)])
         # Decode using etcpak itself
         run([ENCODERS["etcpak"], "-v", str(pvr), str(dec_png)])
-        return dec_png, t_enc
-
-    if name == "etcpack_slow":
-        # ETCPACK needs PPM in/out
-        ppm = work_dir / "in.ppm"
-        pkm = work_dir / "out.pkm"
-        out_ppm = work_dir / "decoded.ppm"
-        subprocess.run(["convert", str(src_png), str(ppm)], check=True)
-        _, t_enc = run([ENCODERS["etcpack_slow"], "-s", "slow", "-c", "etc1",
-                        "-e", "nonperceptual", "-f", "RGB", str(ppm), str(pkm)])
-        # Decode via ETCPACK
-        run([ENCODERS["etcpack_slow"], str(pkm), str(out_ppm)])
-        subprocess.run(["convert", str(out_ppm), str(dec_png)], check=True)
         return dec_png, t_enc
 
     if name == "etc2comp_e100":
