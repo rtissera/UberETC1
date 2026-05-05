@@ -15,7 +15,8 @@ OUT.mkdir(parents=True, exist_ok=True)
 # 1920x1080 -> roughly center where detail typically lies.
 CROP = (700, 400, 256, 256)
 
-ENCODERS = ["etcpak", "etc2comp_e100", "rg_etc1_hq", "basisu_full", "etcpack_slow"]
+ENCODERS = ["etcpak", "etc2comp_e100", "rg_etc1_hq", "basisu_full",
+            "basisu_full_perc", "basisu_v3_corners_perc", "etcpack_slow"]
 
 LABEL_H = 24
 
