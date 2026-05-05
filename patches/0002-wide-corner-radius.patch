@@ -1,0 +1,94 @@
+UberETC1 research-branch — idea #4: thread-local wide corner-cube radius.
+
+Supersedes 0001-try-all-corners.patch. Apply this patch INSTEAD of
+0001 (or revert 0001 first); the legacy 8-corner cube behaviour is
+preserved verbatim under the radius<=0 branch in the new code, so the
+v3_corners_perc encoder produces bit-identical output to the 0001-only
+build (verified by md5).
+
+With g_uberetc1_wide_corner_radius set to N>=1 by an encoder driver,
+compute_internal_cluster_fit()'s per-perm corner search expands from
+{0,-1}^3 (8 corners) to {-N..+N}^3 ((2N+1)^3 corners) around the rounded
+LS center. The v5_idea4 driver sets radius=2 (=125 corners) on the worst
+5% of blocks in pass 2, leaving the other 95% at the default 8-corner cube.
+
+Apply:
+    patch -p1 -d encoders/basis_universal < patches/0002-wide-corner-radius.patch
+
+--- a/encoder/basisu_etc.h
++++ b/encoder/basisu_etc.h
+@@ -80,6 +80,10 @@ namespace basisu
+ 	extern const int g_etc1_inten_tables[cETC1IntenModifierValues][cETC1SelectorValues];
+ 	extern const uint8_t g_etc1_to_selector_index[cETC1SelectorValues];
+ 	extern const uint8_t g_selector_index_to_etc1[cETC1SelectorValues];
++
++	// UberETC1 idea #4: thread-local widening of the cluster-fit corner search.
++	// 0 = legacy 8-corner cube, N = full (2N+1)^3 cube around LS center.
++	extern thread_local int g_uberetc1_wide_corner_radius;
+
+ 	struct etc_coord2
+ 	{
+--- a/encoder/basisu_etc.cpp
++++ b/encoder/basisu_etc.cpp
+@@ -24,6 +24,16 @@
+
+ namespace basisu
+ {
++	// UberETC1 research-branch knob (idea #4): controls how many quantization-cube
++	// corners cluster_fit's compute_internal_cluster_fit() probes around the
++	// rounded LS solution per perm.
++	//   0 (default): legacy 8-corner cube {0,-1}^3 (this is the existing
++	//                "try-all-corners" behavior on the research branch).
++	//   N>=1:        full (2N+1)^3 cube {-N..+N}^3 around LS center.
++	// The flag is thread-local so per-block second-pass can opt in without
++	// affecting other threads' default-quality first pass.
++	thread_local int g_uberetc1_wide_corner_radius = 0;
++
+ 	const int8_t g_etc2_eac_tables[16][8] =
+ 	{
+ 		{ -3, -6, -9, -15, 2, 5, 8, 14 }, { -3, -7, -10, -13, 2, 6, 9, 12 }, { -2, -5, -8, -13, 1, 4, 7, 12 }, { -2, -4, -6, -13, 1, 3, 5, 12 },
+@@ -988,7 +998,42 @@ namespace basisu
+ 			printf("Second refinement trial %u, avg_delta %f %f %f\n", i, avg_delta_r_f, avg_delta_g_f, avg_delta_b_f);
+ #endif
+
+-			evaluate_solution(etc1_solution_coordinates(br1, bg1, bb1, 0, m_pParams->m_use_color4), m_trial_solution, &m_best_solution);
++			// Try quantization-cube corners around the rounded LS solution.
++			// Radius 0 (default): legacy {0,-1}^3 = 8 corners (== old try-all-corners).
++			// Radius >=1:         full (2R+1)^3 cube around (br1,bg1,bb1)
++			//                     for the worst-N second pass (idea #4).
++			if (g_uberetc1_wide_corner_radius <= 0)
++			{
++				for (int ddr = 0; ddr <= 1; ++ddr) {
++					int br_t = br1 + (ddr ? -1 : 0);
++					if (br_t < 0 || br_t > (int)m_limit) br_t = br1;
++					for (int ddg = 0; ddg <= 1; ++ddg) {
++						int bg_t = bg1 + (ddg ? -1 : 0);
++						if (bg_t < 0 || bg_t > (int)m_limit) bg_t = bg1;
++						for (int ddb = 0; ddb <= 1; ++ddb) {
++							int bb_t = bb1 + (ddb ? -1 : 0);
++							if (bb_t < 0 || bb_t > (int)m_limit) bb_t = bb1;
++							evaluate_solution(etc1_solution_coordinates(br_t, bg_t, bb_t, 0, m_pParams->m_use_color4), m_trial_solution, &m_best_solution);
++						}
++					}
++				}
++			}
++			else
++			{
++				const int R = g_uberetc1_wide_corner_radius;
++				for (int dr = -R; dr <= R; ++dr) {
++					const int br_t = br1 + dr;
++					if (br_t < 0 || br_t > (int)m_limit) continue;
++					for (int dg = -R; dg <= R; ++dg) {
++						const int bg_t = bg1 + dg;
++						if (bg_t < 0 || bg_t > (int)m_limit) continue;
++						for (int db = -R; db <= R; ++db) {
++							const int bb_t = bb1 + db;
++							if (bb_t < 0 || bb_t > (int)m_limit) continue;
++							evaluate_solution(etc1_solution_coordinates(br_t, bg_t, bb_t, 0, m_pParams->m_use_color4), m_trial_solution, &m_best_solution);
++						}
++					}
++				}
++			}
+
+ 			if (m_best_solution.m_error == 0)
+ 				break;

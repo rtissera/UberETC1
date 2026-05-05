@@ -46,6 +46,10 @@ ENCODERS = {
     "v4_ycocg":          str(BUILD / "basisu_etc1_tool_v4_ycocg"),
     "v4_ycocg_dither":   str(BUILD / "basisu_etc1_tool_v4_ycocg"),
     "v4_no_adaptive":    str(BUILD / "basisu_etc1_tool_v4"),
+    # research-branch v5: idea #4, importance-driven worst-N re-encoding.
+    # Pass 1 = v3_corners_perc; pass 2 widens corner cube to 125 around LS
+    # centers for the worst 5% of blocks by reconstructed Y-MSE.
+    "v5_idea4":          str(BUILD / "basisu_etc1_tool_v5"),
 }
 
 def run(cmd, timeout=600):
@@ -120,6 +124,19 @@ def encode_decode(name, src_png, work_dir):
         t0 = time.time()
         subprocess.run([ENCODERS[name], "encode", str(src_png), str(bin_path)],
                        env=env, capture_output=True, timeout=600)
+        t_enc = time.time() - t0
+        subprocess.run([ENCODERS[name], "decode", str(bin_path), str(dec_png)],
+                       env=env, capture_output=True, timeout=120)
+        return dec_png, t_enc
+
+    if name == "v5_idea4":
+        bin_path = work_dir / "out.bin"
+        env = {**os.environ,
+               "UBERETC1_WORST_PCT": "5.0",
+               "UBERETC1_WORST_RADIUS": "2"}
+        t0 = time.time()
+        subprocess.run([ENCODERS[name], "encode", str(src_png), str(bin_path)],
+                       env=env, capture_output=True, timeout=900)
         t_enc = time.time() - t0
         subprocess.run([ENCODERS[name], "decode", str(bin_path), str(dec_png)],
                        env=env, capture_output=True, timeout=120)

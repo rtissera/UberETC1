@@ -25,8 +25,10 @@ BITSTREAM = {
     "basisu_full_perc": "out.bin",
     "basisu_v3_corners": "out.bin",
     "basisu_v3_corners_perc": "out.bin",
+    "v5_idea4": "out.bin",
 }
-RAW_OK = {"rg_etc1_hq", "basisu_full", "basisu_full_perc", "basisu_v3_corners", "basisu_v3_corners_perc"}
+RAW_OK = {"rg_etc1_hq", "basisu_full", "basisu_full_perc", "basisu_v3_corners",
+          "basisu_v3_corners_perc", "v5_idea4"}
 
 
 def psnr(a, b):

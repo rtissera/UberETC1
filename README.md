@@ -88,8 +88,14 @@ git clone https://github.com/richgel999/rg-etc1.git encoders/rg-etc1
 curl -sL https://raw.githubusercontent.com/nothings/stb/master/stb_image.h -o encoders/stb_image.h
 curl -sL https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h -o encoders/stb_image_write.h
 
-# Apply our patches
-patch -p0 -d encoders/basis_universal < patches/0001-try-all-corners.patch
+# Apply our patches.
+# - 0001 (legacy main-branch): adds the 8-corner try-all-corners cube.
+# - 0002 (research-branch, supersedes 0001): adds a thread-local
+#   g_uberetc1_wide_corner_radius knob; default 0 reproduces 0001's
+#   8-corner behaviour bit-exactly, and the v5_idea4 driver sets
+#   radius=2 (= 125 corners) on the worst 5% of blocks.
+# Apply ONE of them, not both:
+patch -p1 -d encoders/basis_universal < patches/0002-wide-corner-radius.patch
 
 # Build encoders (etcpak needs CMake 3.20+; lower minimum if needed)
 mkdir -p build/{etcpak,etc2comp,basisu}
@@ -101,6 +107,10 @@ mkdir -p build/{etcpak,etc2comp,basisu}
 g++ -O3 -fopenmp -Iencoders -Iencoders encoders/rg_etc1_tool.cpp encoders/rg-etc1/rg_etc1.cpp -o build/rg_etc1_tool
 g++ -O3 -fopenmp -std=c++17 -Iencoders encoders/basisu_etc1_tool.cpp build/basisu/libbasisu_encoder.a -lpthread -o build/basisu_etc1_tool
 g++ -O3 -fopenmp -std=c++17 -Iencoders encoders/basisu_etc1_tool_v2.cpp build/basisu/libbasisu_encoder.a -lpthread -o build/basisu_etc1_tool_v2
+# v3 binaries are identical sources to v1/v2, just rebuilt against the
+# patched libbasisu_encoder.a; copy or symlink as v3 / v3_perc.
+# Research-branch driver for idea #4 (worst-N re-encoding):
+g++ -O3 -fopenmp -std=c++17 -Iencoders encoders/basisu_etc1_tool_v5.cpp build/basisu/libbasisu_encoder.a -lpthread -o build/basisu_etc1_tool_v5
 
 # GPU validator
 gcc -O2 -Iencoders encoders/gl_decode.c -lEGL -lGLESv2 -o build/gl_decode
