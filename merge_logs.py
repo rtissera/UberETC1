@@ -4,11 +4,18 @@ import re, sys, json
 from pathlib import Path
 
 LOGS = {
-    "etcpak":         "/tmp/etcpak.log",
-    "rg_etc1_hq":     "/tmp/rg.log",
-    "basisu_full":    "/tmp/basisu.log",
-    "etc2comp_e100":  "/tmp/etc2c.log",
-    "etcpack_slow":   "/tmp/etcpack2.log",
+    "etcpak":            "/tmp/etcpak.log",
+    "rg_etc1_hq":        "/tmp/rg.log",
+    "basisu_full":       "/tmp/basisu.log",
+    "basisu_full_perc":  "/tmp/basisu_perc.log",
+    "etc2comp_e100":     "/tmp/etc2c.log",
+    "v3_corners":        "/tmp/v3rgb.log",
+    "v3_corners_perc":   "/tmp/v3perc.log",
+    "v4_default":        "/tmp/v4d.log",
+    "v4_dither":         "/tmp/v4dith.log",
+    "v4_ycocg":          "/tmp/v4yc.log",
+    "v4_ycocg_dither":   "/tmp/v4ycd.log",
+    "v4_no_adaptive":    "/tmp/v4na.log",
 }
 # also include the original etcpak run output
 EXTRA = "/home/romain/etc1_bench/results/results.json"

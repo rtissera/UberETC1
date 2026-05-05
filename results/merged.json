@@ -1,6 +1,54 @@
 [
   {
     "image": "MIX1.png",
+    "encoder": "v4_no_adaptive",
+    "psnr_rgb": 36.094,
+    "psnr_y": 44.141,
+    "ssim_y": 0.9903,
+    "encode_seconds": 9.41
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v4_no_adaptive",
+    "psnr_rgb": 44.055,
+    "psnr_y": 45.136,
+    "ssim_y": 0.9888,
+    "encode_seconds": 8.83
+  },
+  {
+    "image": "all.png",
+    "encoder": "v4_no_adaptive",
+    "psnr_rgb": 24.323,
+    "psnr_y": 32.04,
+    "ssim_y": 0.9879,
+    "encode_seconds": 14.31
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v4_no_adaptive",
+    "psnr_rgb": 40.21,
+    "psnr_y": 46.608,
+    "ssim_y": 0.993,
+    "encode_seconds": 4.08
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v4_no_adaptive",
+    "psnr_rgb": 39.853,
+    "psnr_y": 46.106,
+    "ssim_y": 0.995,
+    "encode_seconds": 3.5
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v4_no_adaptive",
+    "psnr_rgb": 41.59,
+    "psnr_y": 47.024,
+    "ssim_y": 0.9971,
+    "encode_seconds": 3.04
+  },
+  {
+    "image": "MIX1.png",
     "encoder": "etcpak",
     "psnr_rgb": 34.703,
     "psnr_y": 41.543,
@@ -145,6 +193,54 @@
   },
   {
     "image": "MIX1.png",
+    "encoder": "basisu_full_perc",
+    "psnr_rgb": 36.146,
+    "psnr_y": 44.045,
+    "ssim_y": 0.9901,
+    "encode_seconds": 0.95
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "basisu_full_perc",
+    "psnr_rgb": 44.897,
+    "psnr_y": 44.897,
+    "ssim_y": 0.9885,
+    "encode_seconds": 0.59
+  },
+  {
+    "image": "all.png",
+    "encoder": "basisu_full_perc",
+    "psnr_rgb": 24.352,
+    "psnr_y": 31.986,
+    "ssim_y": 0.9878,
+    "encode_seconds": 2.39
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "basisu_full_perc",
+    "psnr_rgb": 40.476,
+    "psnr_y": 46.536,
+    "ssim_y": 0.9929,
+    "encode_seconds": 1.04
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "basisu_full_perc",
+    "psnr_rgb": 40.019,
+    "psnr_y": 45.979,
+    "ssim_y": 0.995,
+    "encode_seconds": 1.05
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "basisu_full_perc",
+    "psnr_rgb": 42.005,
+    "psnr_y": 46.824,
+    "ssim_y": 0.9971,
+    "encode_seconds": 0.88
+  },
+  {
+    "image": "MIX1.png",
     "encoder": "etc2comp_e100",
     "psnr_rgb": 37.531,
     "psnr_y": 41.638,
@@ -190,5 +286,293 @@
     "psnr_y": 45.894,
     "ssim_y": 0.996,
     "encode_seconds": 18.02
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "basisu_v3_corners",
+    "psnr_rgb": 37.501,
+    "psnr_y": 41.507,
+    "ssim_y": 0.9818,
+    "encode_seconds": 3.73
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "basisu_v3_corners",
+    "psnr_rgb": 44.904,
+    "psnr_y": 44.904,
+    "ssim_y": 0.9885,
+    "encode_seconds": 2.76
+  },
+  {
+    "image": "all.png",
+    "encoder": "basisu_v3_corners",
+    "psnr_rgb": 25.284,
+    "psnr_y": 30.038,
+    "ssim_y": 0.9796,
+    "encode_seconds": 7.97
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "basisu_v3_corners",
+    "psnr_rgb": 41.909,
+    "psnr_y": 45.511,
+    "ssim_y": 0.9911,
+    "encode_seconds": 6.8
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "basisu_v3_corners",
+    "psnr_rgb": 41.589,
+    "psnr_y": 44.484,
+    "ssim_y": 0.9907,
+    "encode_seconds": 5.22
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "basisu_v3_corners",
+    "psnr_rgb": 42.905,
+    "psnr_y": 45.824,
+    "ssim_y": 0.9958,
+    "encode_seconds": 3.79
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 36.094,
+    "psnr_y": 44.141,
+    "ssim_y": 0.9903,
+    "encode_seconds": 5.51
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 44.055,
+    "psnr_y": 45.136,
+    "ssim_y": 0.9888,
+    "encode_seconds": 3.56
+  },
+  {
+    "image": "all.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 24.323,
+    "psnr_y": 32.04,
+    "ssim_y": 0.9879,
+    "encode_seconds": 12.94
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 40.21,
+    "psnr_y": 46.608,
+    "ssim_y": 0.993,
+    "encode_seconds": 8.02
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 39.853,
+    "psnr_y": 46.106,
+    "ssim_y": 0.995,
+    "encode_seconds": 4.23
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 41.59,
+    "psnr_y": 47.024,
+    "ssim_y": 0.9971,
+    "encode_seconds": 3.61
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "v4_default",
+    "psnr_rgb": 36.303,
+    "psnr_y": 43.786,
+    "ssim_y": 0.9878,
+    "encode_seconds": 0.76
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v4_default",
+    "psnr_rgb": 44.059,
+    "psnr_y": 44.976,
+    "ssim_y": 0.9906,
+    "encode_seconds": 0.88
+  },
+  {
+    "image": "all.png",
+    "encoder": "v4_default",
+    "psnr_rgb": 24.324,
+    "psnr_y": 32.035,
+    "ssim_y": 0.9876,
+    "encode_seconds": 20.43
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v4_default",
+    "psnr_rgb": 41.241,
+    "psnr_y": 45.469,
+    "ssim_y": 0.9894,
+    "encode_seconds": 2.84
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v4_default",
+    "psnr_rgb": 40.766,
+    "psnr_y": 44.916,
+    "ssim_y": 0.9922,
+    "encode_seconds": 1.95
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v4_default",
+    "psnr_rgb": 42.116,
+    "psnr_y": 46.436,
+    "ssim_y": 0.9957,
+    "encode_seconds": 2.39
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "v4_dither",
+    "psnr_rgb": 34.957,
+    "psnr_y": 39.531,
+    "ssim_y": 0.9479,
+    "encode_seconds": 1.27
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v4_dither",
+    "psnr_rgb": 37.581,
+    "psnr_y": 37.886,
+    "ssim_y": 0.9024,
+    "encode_seconds": 1.95
+  },
+  {
+    "image": "all.png",
+    "encoder": "v4_dither",
+    "psnr_rgb": 24.182,
+    "psnr_y": 31.348,
+    "ssim_y": 0.9814,
+    "encode_seconds": 22.9
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v4_dither",
+    "psnr_rgb": 37.427,
+    "psnr_y": 38.913,
+    "ssim_y": 0.9286,
+    "encode_seconds": 2.73
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v4_dither",
+    "psnr_rgb": 37.921,
+    "psnr_y": 40.255,
+    "ssim_y": 0.9448,
+    "encode_seconds": 2.71
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v4_dither",
+    "psnr_rgb": 39.659,
+    "psnr_y": 41.977,
+    "ssim_y": 0.9761,
+    "encode_seconds": 1.67
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "v4_ycocg",
+    "psnr_rgb": 37.092,
+    "psnr_y": 43.439,
+    "ssim_y": 0.9874,
+    "encode_seconds": 0.73
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v4_ycocg",
+    "psnr_rgb": 44.439,
+    "psnr_y": 44.983,
+    "ssim_y": 0.9906,
+    "encode_seconds": 0.93
+  },
+  {
+    "image": "all.png",
+    "encoder": "v4_ycocg",
+    "psnr_rgb": 24.967,
+    "psnr_y": 31.648,
+    "ssim_y": 0.9861,
+    "encode_seconds": 19.11
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v4_ycocg",
+    "psnr_rgb": 41.564,
+    "psnr_y": 45.455,
+    "ssim_y": 0.9894,
+    "encode_seconds": 1.32
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v4_ycocg",
+    "psnr_rgb": 41.327,
+    "psnr_y": 44.836,
+    "ssim_y": 0.992,
+    "encode_seconds": 1.77
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v4_ycocg",
+    "psnr_rgb": 42.731,
+    "psnr_y": 46.384,
+    "ssim_y": 0.9956,
+    "encode_seconds": 1.7
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "v4_ycocg_dither",
+    "psnr_rgb": 35.664,
+    "psnr_y": 39.575,
+    "ssim_y": 0.9499,
+    "encode_seconds": 2.13
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v4_ycocg_dither",
+    "psnr_rgb": 37.657,
+    "psnr_y": 37.897,
+    "ssim_y": 0.9025,
+    "encode_seconds": 1.45
+  },
+  {
+    "image": "all.png",
+    "encoder": "v4_ycocg_dither",
+    "psnr_rgb": 24.858,
+    "psnr_y": 31.154,
+    "ssim_y": 0.981,
+    "encode_seconds": 19.35
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v4_ycocg_dither",
+    "psnr_rgb": 37.635,
+    "psnr_y": 38.983,
+    "ssim_y": 0.9294,
+    "encode_seconds": 2.55
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v4_ycocg_dither",
+    "psnr_rgb": 38.343,
+    "psnr_y": 40.374,
+    "ssim_y": 0.9454,
+    "encode_seconds": 2.71
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v4_ycocg_dither",
+    "psnr_rgb": 40.164,
+    "psnr_y": 42.199,
+    "ssim_y": 0.9769,
+    "encode_seconds": 2.09
   }
 ]

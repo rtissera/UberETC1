@@ -40,6 +40,12 @@ ENCODERS = {
     "basisu_full_perc": str(BUILD / "basisu_etc1_tool_v2"),
     "basisu_v3_corners": str(BUILD / "basisu_etc1_tool_v3"),
     "basisu_v3_corners_perc": str(BUILD / "basisu_etc1_tool_v3_perc"),
+    # research-branch v4: adaptive per-block effort + (optional) YCoCg + (optional) dither
+    "v4_default":        str(BUILD / "basisu_etc1_tool_v4"),
+    "v4_dither":         str(BUILD / "basisu_etc1_tool_v4"),
+    "v4_ycocg":          str(BUILD / "basisu_etc1_tool_v4_ycocg"),
+    "v4_ycocg_dither":   str(BUILD / "basisu_etc1_tool_v4_ycocg"),
+    "v4_no_adaptive":    str(BUILD / "basisu_etc1_tool_v4"),
 }
 
 def run(cmd, timeout=600):
@@ -98,6 +104,25 @@ def encode_decode(name, src_png, work_dir):
         bin_path = work_dir / "out.bin"
         _, t_enc = run([ENCODERS["basisu_v3_corners_perc"], "encode", str(src_png), str(bin_path)])
         run([ENCODERS["basisu_v3_corners_perc"], "decode", str(bin_path), str(dec_png)])
+        return dec_png, t_enc
+
+    # ---- v4 research-branch variants (adaptive + YCoCg/YCbCr + dither) ----
+    v4_envs = {
+        "v4_default":      {"UBERETC1_PERCEPTUAL": "1", "UBERETC1_ADAPTIVE": "1", "UBERETC1_DITHER": "0"},
+        "v4_dither":       {"UBERETC1_PERCEPTUAL": "1", "UBERETC1_ADAPTIVE": "1", "UBERETC1_DITHER": "1"},
+        "v4_ycocg":        {"UBERETC1_PERCEPTUAL": "1", "UBERETC1_ADAPTIVE": "1", "UBERETC1_DITHER": "0"},
+        "v4_ycocg_dither": {"UBERETC1_PERCEPTUAL": "1", "UBERETC1_ADAPTIVE": "1", "UBERETC1_DITHER": "1"},
+        "v4_no_adaptive":  {"UBERETC1_PERCEPTUAL": "1", "UBERETC1_ADAPTIVE": "0", "UBERETC1_DITHER": "0"},
+    }
+    if name in v4_envs:
+        bin_path = work_dir / "out.bin"
+        env = {**os.environ, **v4_envs[name]}
+        t0 = time.time()
+        subprocess.run([ENCODERS[name], "encode", str(src_png), str(bin_path)],
+                       env=env, capture_output=True, timeout=600)
+        t_enc = time.time() - t0
+        subprocess.run([ENCODERS[name], "decode", str(bin_path), str(dec_png)],
+                       env=env, capture_output=True, timeout=120)
         return dec_png, t_enc
 
     raise ValueError(name)
