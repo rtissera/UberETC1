@@ -50,6 +50,11 @@ ENCODERS = {
     # Pass 1 = v3_corners_perc; pass 2 widens corner cube to 125 around LS
     # centers for the worst 5% of blocks by reconstructed Y-MSE.
     "v5_idea4":          str(BUILD / "basisu_etc1_tool_v5"),
+    # research-branch v6: idea #2 (MS-SSIM top-K rerank) stacked on v5_idea4.
+    # Same pass 1; pass 2 generates 8 candidates per worst block × (flip,diff,
+    # radius∈{1,2}) plus the pass-1 result, reranks by MS-SSIM_Y on a 12×12
+    # (3×3 block) window using already-pass-1-encoded neighbors as context.
+    "v6_idea2":          str(BUILD / "basisu_etc1_tool_v6"),
 }
 
 def run(cmd, timeout=600):
@@ -130,6 +135,19 @@ def encode_decode(name, src_png, work_dir):
         return dec_png, t_enc
 
     if name == "v5_idea4":
+        bin_path = work_dir / "out.bin"
+        env = {**os.environ,
+               "UBERETC1_WORST_PCT": "5.0",
+               "UBERETC1_WORST_RADIUS": "2"}
+        t0 = time.time()
+        subprocess.run([ENCODERS[name], "encode", str(src_png), str(bin_path)],
+                       env=env, capture_output=True, timeout=900)
+        t_enc = time.time() - t0
+        subprocess.run([ENCODERS[name], "decode", str(bin_path), str(dec_png)],
+                       env=env, capture_output=True, timeout=120)
+        return dec_png, t_enc
+
+    if name == "v6_idea2":
         bin_path = work_dir / "out.bin"
         env = {**os.environ,
                "UBERETC1_WORST_PCT": "5.0",

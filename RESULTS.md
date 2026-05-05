@@ -29,14 +29,102 @@ role goes to rg_etc1 instead.
 
 | Encoder | PSNR_RGB (dB) | PSNR_Y (dB) | SSIM_Y | Time (s) | Threads |
 |---|---:|---:|---:|---:|---|
-| **v5_idea4** (worst-N re-encode @ 5%, radius=2) | 37.672 | **43.540** | **0.9920** | 5.44 | 32 |
-| **basisu_v3_corners_perc** (cluster fit + perceptual + try-all-corners) | 37.688 | 43.509 | 0.9920 | 3.45 | 32 |
+| **v6_idea2** (idea#2 MS-SSIM rerank stacked on v5_idea4) | 37.520 | **43.551** | **0.9920** | 6.67 | 32 |
+| **v5_idea4** (worst-N re-encode @ 5%, radius=2) | 37.672 | 43.540 | 0.9920 | 5.87 | 32 |
+| **basisu_v3_corners_perc** (cluster fit + perceptual + try-all-corners) | 37.688 | 43.509 | 0.9920 | 3.73 | 32 |
 | basisu_full_perc (cluster fit + perceptual) | 37.983 | 43.378 | 0.9919 | 1.15 | 32 |
 | **rg_etc1 cHighQuality** | **39.229** | 42.197 | 0.9895 | 19.20 | 32 |
 | etc2comp -effort 100 | 39.109 | 42.080 | 0.9894 | 39.49 | 8 |
 | basisu_full (cluster fit, RGB metric) | 39.016 | 42.047 | 0.9879 | 3.44 | 32 |
 | basisu_v3_corners (try-all-corners RGB) | 39.015 | 42.045 | 0.9879 | 5.04 | 32 |
 | etcpak | 35.879 | 39.718 | 0.9670 | 0.04 | 32 |
+
+### v6_idea2 — Idea #2 (MS-SSIM top-K rerank), stacked on v5_idea4
+
+Pass 1 = `basisu_v3_corners_perc` (cluster_fit + Uber + perceptual YCbCr +
+8-corner cube), identical to v5's pass 1. Pass 2 = top 5% of blocks by
+reconstructed Y-MSE: for each worst block, generate 8 candidates as
+`{flip ∈ {0,1}} × {diff ∈ {0,1}} × {wide_corner_radius ∈ {1,2}}` (each
+tuple commits to one (flip, diff) and runs cluster_fit at that radius);
+add the pass-1 encoded block as candidate #9. Re-rank these 9 candidates
+under **MS-SSIM_Y** evaluated on a 12×12 (3×3-block) window centered on
+the block, using already-pass-1-encoded neighbors as fixed context.
+Multi-scale SSIM at scales 1, 1/2, 1/4 with 2×2 box-average downsampling
+between scales, geometric mean. Boundary blocks shrink the window to
+whatever neighbors exist (no fabrication). Final block = MS-SSIM winner.
+
+**Mean delta vs `basisu_v3_corners_perc` (baseline) and `v5_idea4`:**
+
+| Metric          | baseline | v5_idea4 | v6_idea2 | Δ vs baseline | Δ vs v5_idea4 |
+|---|---:|---:|---:|---:|---:|
+| PSNR_Y  (dB)    | 43.509   | 43.540   | **43.551** | +0.042  | +0.011 |
+| SSIM_Y          | 0.99202  | 0.99206  | 0.99207    | +0.00005 | +0.00001 |
+| PSNR_RGB (dB)   | 37.688   | 37.672   | 37.520     | -0.168   | -0.152 |
+| Encode (s)      | 3.73     | 5.87     | 6.67       |  +2.94    | +0.80 |
+
+Per-image PSNR_Y and SSIM_Y, baseline → v5_idea4 → v6_idea2:
+
+| Image          | basisu_v3_corners_perc | v5_idea4 | v6_idea2 | Δ Y vs base | Δ Y vs v5 | Δ SSIM vs base |
+|---|---:|---:|---:|---:|---:|---:|
+| MIX1.png       | 44.1413 / 0.990253 | 44.1640 / 0.990277 | 44.2205 / 0.990342 | +0.079 | +0.057 | +0.000089 |
+| MIX5.png       | 45.1355 / 0.988801 | 45.1473 / 0.988805 | 45.1191 / 0.988792 | -0.016 | -0.028 | -0.000009 |
+| all.png        | 32.0397 / 0.987876 | 32.0562 / 0.987909 | 32.1238 / 0.988034 | +0.084 | +0.068 | +0.000158 |
+| gamelist_doom  | 46.6077 / 0.992956 | 46.6407 / 0.992968 | 46.6447 / 0.992988 | +0.037 | +0.004 | +0.000032 |
+| gamelist_ffvii | 46.1055 / 0.995003 | 46.1551 / 0.995019 | 46.1390 / 0.995023 | +0.034 | -0.016 | +0.000020 |
+| gamelist_sonic2| 47.0237 / 0.997146 | 47.0751 / 0.997162 | 47.0569 / 0.997166 | +0.033 | -0.018 | +0.000020 |
+
+Per-image pass-2 internal stats (worst 5% = 6480 blocks of ~129,600):
+
+| Image          | candidates avg/blk | kept_pass1 | kept_pass2 (rerank picked a wider candidate) | msssim_diverged_from_mse_best | y_mse_regressed_vs_pass1 |
+|---|---:|---:|---:|---:|---:|
+| MIX1.png       | 7.4 |  147 | 6333 | 1691 (26.1%) |  947 (14.6%) |
+| MIX5.png       | 8.2 |   35 | 6445 | 1541 (23.8%) | 1133 (17.5%) |
+| all.png        | 5.6 |  222 | 6258 | 1642 (25.3%) |  830 (12.8%) |
+| gamelist_doom  | 7.6 |  129 | 6351 | 1032 (15.9%) |  583  (9.0%) |
+| gamelist_ffvii | 7.2 |  123 | 6357 |  941 (14.5%) |  590  (9.1%) |
+| gamelist_sonic2| 7.0 |  189 | 6291 | 1019 (15.7%) |  645 (10.0%) |
+
+GPU-validated bit-exactly on AMD Radeon 780M for all 6 images
+(mean abs diff vs SW decoder = 0.000000).
+
+**Verdict: stacking is essentially a wash on Y-PSNR (+0.011 dB on the mean),
+flat on SSIM_Y (+0.00001), and costs **−0.152 dB RGB-PSNR** vs v5_idea4.
+Per-image, v6 beats v5 on 3 of 6 images on PSNR_Y (MIX1, all, doom) and
+loses on 3 (MIX5, ffvii, sonic2). The MS-SSIM rerank picks a non-MSE-best
+candidate 14–26% of the time, and accepts a Y-MSE regression vs pass 1 on
+9–18% of worst blocks — both confirm the rerank is doing something
+non-trivial, but the SSIM win on those swaps is tiny on this content.**
+
+**Hypothesis for the wash:**
+
+1. The 9 candidates per block come from cluster_fit's MSE-optimal output
+   for each (flip, diff, radius) slice. They are already very close in
+   perceptual error — the per-slice top-1 is nearly indistinguishable
+   from the per-slice top-K under MSE *or* MS-SSIM. We are not exploring
+   the kind of "different distortion pattern" candidates (e.g. a different
+   inten table that biases error spatially) that MS-SSIM would actually
+   reward — those would require a true top-K heap inside the optimizer
+   per the spec, not a parameter-grid sweep.
+2. The MS-SSIM window is 12×12 = 144 pixels including 8 pass-1
+   neighbors. The 16-pixel candidate region is only 11% of the window;
+   neighbor pixels dominate the SSIM means/variances and dilute the
+   ranking signal of the candidate's own variation.
+3. The pass-2 candidates already differ from pass 1 mostly at radius=2,
+   which is already captured by v5_idea4's MSE-only acceptance. The
+   only true *new* signal v6 introduces is "accept a candidate whose
+   Y-MSE is *worse* than pass 1 because MS-SSIM says it's better in a
+   neighbor-aware sense" — and on this dataset that swap pays for
+   itself only on a few % of blocks.
+4. SSIM_Y at 4-decimal precision is unchanged because the per-block
+   gain is small and bound to the 13k worst blocks; image-wide SSIM
+   averaging dilutes it.
+
+**To make idea #2 actually deliver, the next step would be exposing a
+real top-K heap inside `etc1_optimizer::evaluate_solution_slow` (the
+header struct `uberetc1_topk_entry` is in place, capture logic isn't),
+so the K candidates per (flip, diff) are genuinely non-MSE-equivalent
+sub-block solutions — different inten tables, different selectors —
+rather than the single-MSE-optimal-per-slice output we feed in now.**
 
 ### v5_idea4 — Idea #4 (importance-driven worst-N re-encoding)
 
@@ -147,7 +235,11 @@ improvements. We have implemented:
 - [x] Step 2: weighted YCbCr metric
 - [x] Step 3: try-all 8 quantization corners
 - [ ] Step 4: joint sub-block optimization in diff mode (iterate SB1/SB0 fix-points)
-- [ ] Step 5: MS-SSIM final selection between top-K candidates with 3×3-block window
+- [~] Step 5: MS-SSIM final selection between top-K candidates with 3×3-block window
+      — partial: v6_idea2 implements the rerank with parameter-grid candidates
+        (flip × diff × radius), but real top-K-per-(flip,diff) capture inside
+        `etc1_optimizer::evaluate_solution_slow` is not yet wired. Wash on
+        this 6-image set (+0.011 dB Y-PSNR vs v5_idea4, flat SSIM_Y).
 - [ ] Step 6: branch-and-bound exhaustive base-color search (ultra mode)
 - [ ] Step 7: differentiable post-pass (Gumbel-softmax + LPIPS)
 - [ ] Step 8: neural warm-start CNN (only if encode time becomes a constraint)
