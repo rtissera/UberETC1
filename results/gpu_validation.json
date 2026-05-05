@@ -63,6 +63,13 @@
     "sw_vs_gpu_meandiff": 0.0
   },
   {
+    "image": "MIX1.png",
+    "encoder": "v7_guarded_idea5",
+    "sw_psnr": 36.0389,
+    "gpu_psnr": 36.0389,
+    "sw_vs_gpu_meandiff": 0.0
+  },
+  {
     "image": "MIX5.png",
     "encoder": "etcpak",
     "sw_psnr": 41.4155,
@@ -123,6 +130,13 @@
     "encoder": "v6_idea2_v2",
     "sw_psnr": 42.6757,
     "gpu_psnr": 42.6757,
+    "sw_vs_gpu_meandiff": 0.0
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v7_guarded_idea5",
+    "sw_psnr": 44.2117,
+    "gpu_psnr": 44.2117,
     "sw_vs_gpu_meandiff": 0.0
   },
   {
@@ -189,6 +203,13 @@
     "sw_vs_gpu_meandiff": 0.0
   },
   {
+    "image": "all.png",
+    "encoder": "v7_guarded_idea5",
+    "sw_psnr": 24.3043,
+    "gpu_psnr": 24.3043,
+    "sw_vs_gpu_meandiff": 0.0
+  },
+  {
     "image": "gamelist_doom.png",
     "encoder": "etcpak",
     "sw_psnr": 38.7823,
@@ -249,6 +270,13 @@
     "encoder": "v6_idea2_v2",
     "sw_psnr": 39.7828,
     "gpu_psnr": 39.7828,
+    "sw_vs_gpu_meandiff": 0.0
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v7_guarded_idea5",
+    "sw_psnr": 40.2734,
+    "gpu_psnr": 40.2734,
     "sw_vs_gpu_meandiff": 0.0
   },
   {
@@ -315,6 +343,13 @@
     "sw_vs_gpu_meandiff": 0.0
   },
   {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v7_guarded_idea5",
+    "sw_psnr": 39.9939,
+    "gpu_psnr": 39.9939,
+    "sw_vs_gpu_meandiff": 0.0
+  },
+  {
     "image": "gamelist_sonic2.png",
     "encoder": "etcpak",
     "sw_psnr": 38.7444,
@@ -375,6 +410,13 @@
     "encoder": "v6_idea2_v2",
     "sw_psnr": 40.8235,
     "gpu_psnr": 40.8235,
+    "sw_vs_gpu_meandiff": 0.0
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v7_guarded_idea5",
+    "sw_psnr": 41.7466,
+    "gpu_psnr": 41.7466,
     "sw_vs_gpu_meandiff": 0.0
   }
 ]

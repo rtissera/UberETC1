@@ -61,6 +61,9 @@ ENCODERS = {
     # for each (flip, diff), combine into K×K full-block candidates, pool
     # global top-K=8 by perceptual error, MS-SSIM-rerank K+1 (K + pass-1).
     "v6_idea2_v2":       str(BUILD / "basisu_etc1_tool_v6_v2"),
+    # research-branch v7: v6_v2 + chroma sanity floor (guard rail) +
+    # idea #5 multi-table sub-block refinement on the picked candidate.
+    "v7_guarded_idea5":  str(BUILD / "basisu_etc1_tool_v7_guarded_idea5"),
 }
 
 def run(cmd, timeout=600):
@@ -175,6 +178,25 @@ def encode_decode(name, src_png, work_dir):
         t0 = time.time()
         subprocess.run([ENCODERS[name], "encode", str(src_png), str(bin_path)],
                        env=env, capture_output=True, timeout=1800)
+        t_enc = time.time() - t0
+        subprocess.run([ENCODERS[name], "decode", str(bin_path), str(dec_png)],
+                       env=env, capture_output=True, timeout=120)
+        return dec_png, t_enc
+
+    if name == "v7_guarded_idea5":
+        bin_path = work_dir / "out.bin"
+        env = {**os.environ,
+               "UBERETC1_WORST_PCT": "5.0",
+               "UBERETC1_WORST_RADIUS": "2",
+               "UBERETC1_TOPK": "8",
+               "UBERETC1_CHROMA_FLOOR_DB": "1.5",
+               "UBERETC1_REFINE_ITERS": "4"}
+        t0 = time.time()
+        # Capture stderr to a log so we can extract per-image stats.
+        log_path = work_dir / "encode.log"
+        with open(log_path, "wb") as lf:
+            subprocess.run([ENCODERS[name], "encode", str(src_png), str(bin_path)],
+                           env=env, stdout=subprocess.DEVNULL, stderr=lf, timeout=1800)
         t_enc = time.time() - t0
         subprocess.run([ENCODERS[name], "decode", str(bin_path), str(dec_png)],
                        env=env, capture_output=True, timeout=120)

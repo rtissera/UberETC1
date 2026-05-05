@@ -1,0 +1,212 @@
+[
+  {
+    "image": "MIX1.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 36.094485950268634,
+    "psnr_y": 44.14132009076573,
+    "ssim_y": 0.9902527599035754
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "v5_idea4",
+    "psnr_rgb": 36.08588236541684,
+    "psnr_y": 44.164004077844695,
+    "ssim_y": 0.9902768023541669
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "v6_idea2",
+    "psnr_rgb": 35.98152255508006,
+    "psnr_y": 44.2204652124622,
+    "ssim_y": 0.990341643364638
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "v6_idea2_v2",
+    "psnr_rgb": 35.88574408476506,
+    "psnr_y": 44.34345191693925,
+    "ssim_y": 0.990421855956487
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "v7_guarded_idea5",
+    "psnr_rgb": 36.03888119971599,
+    "psnr_y": 44.30302822536867,
+    "ssim_y": 0.990393508014163
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 44.05511066132029,
+    "psnr_y": 45.13551431971677,
+    "ssim_y": 0.9888005913229647
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v5_idea4",
+    "psnr_rgb": 44.04718975594565,
+    "psnr_y": 45.14733110547324,
+    "ssim_y": 0.9888054793840227
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v6_idea2",
+    "psnr_rgb": 43.891367830988855,
+    "psnr_y": 45.11906303497171,
+    "ssim_y": 0.9887923461643127
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v6_idea2_v2",
+    "psnr_rgb": 42.67572065648716,
+    "psnr_y": 45.27391179461026,
+    "ssim_y": 0.9888823115773361
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v7_guarded_idea5",
+    "psnr_rgb": 44.21173779629796,
+    "psnr_y": 45.11191584092433,
+    "ssim_y": 0.9887879348639355
+  },
+  {
+    "image": "all.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 24.3230828559824,
+    "psnr_y": 32.039682060418485,
+    "ssim_y": 0.987875900737661
+  },
+  {
+    "image": "all.png",
+    "encoder": "v5_idea4",
+    "psnr_rgb": 24.322317484835377,
+    "psnr_y": 32.05622556675395,
+    "ssim_y": 0.9879088277711605
+  },
+  {
+    "image": "all.png",
+    "encoder": "v6_idea2",
+    "psnr_rgb": 24.218526876630616,
+    "psnr_y": 32.12380102135679,
+    "ssim_y": 0.9880338944882704
+  },
+  {
+    "image": "all.png",
+    "encoder": "v6_idea2_v2",
+    "psnr_rgb": 24.28840373985996,
+    "psnr_y": 32.09667590218166,
+    "ssim_y": 0.9879815013757167
+  },
+  {
+    "image": "all.png",
+    "encoder": "v7_guarded_idea5",
+    "psnr_rgb": 24.30431285121793,
+    "psnr_y": 32.10229850889879,
+    "ssim_y": 0.9879953873847599
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 40.210214816797105,
+    "psnr_y": 46.6076993256268,
+    "ssim_y": 0.9929557772372307
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v5_idea4",
+    "psnr_rgb": 40.19994134436351,
+    "psnr_y": 46.640707496970975,
+    "ssim_y": 0.9929680962005717
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v6_idea2",
+    "psnr_rgb": 40.06289318059601,
+    "psnr_y": 46.644711061870495,
+    "ssim_y": 0.9929880686872914
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v6_idea2_v2",
+    "psnr_rgb": 39.78277508195184,
+    "psnr_y": 46.80224048597661,
+    "ssim_y": 0.9930469840774132
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v7_guarded_idea5",
+    "psnr_rgb": 40.27343224777738,
+    "psnr_y": 46.673701914566564,
+    "ssim_y": 0.993001881807266
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 39.852824152437606,
+    "psnr_y": 46.10550036395867,
+    "ssim_y": 0.9950033424190229
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v5_idea4",
+    "psnr_rgb": 39.839514667348254,
+    "psnr_y": 46.15505728051872,
+    "ssim_y": 0.9950189636379309
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v6_idea2",
+    "psnr_rgb": 39.691399503870805,
+    "psnr_y": 46.13904042953906,
+    "ssim_y": 0.9950229805554912
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v6_idea2_v2",
+    "psnr_rgb": 39.31157246443556,
+    "psnr_y": 46.34368978794882,
+    "ssim_y": 0.9950771351479025
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v7_guarded_idea5",
+    "psnr_rgb": 39.993948365386906,
+    "psnr_y": 46.18235457233819,
+    "ssim_y": 0.9950379420777641
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "basisu_v3_corners_perc",
+    "psnr_rgb": 41.590133049735556,
+    "psnr_y": 47.023660100656095,
+    "ssim_y": 0.9971462711155221
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v5_idea4",
+    "psnr_rgb": 41.53921446958301,
+    "psnr_y": 47.07507268827396,
+    "ssim_y": 0.9971622076146085
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v6_idea2",
+    "psnr_rgb": 41.27256480670023,
+    "psnr_y": 47.05685752408694,
+    "ssim_y": 0.9971658378896068
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v6_idea2_v2",
+    "psnr_rgb": 40.82353627946192,
+    "psnr_y": 47.28961639508793,
+    "ssim_y": 0.9972274145765115
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v7_guarded_idea5",
+    "psnr_rgb": 41.74663346609993,
+    "psnr_y": 47.08241479697986,
+    "ssim_y": 0.9971761933446764
+  }
+]

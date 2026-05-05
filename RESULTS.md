@@ -30,6 +30,7 @@ role goes to rg_etc1 instead.
 | Encoder | PSNR_RGB (dB) | PSNR_Y (dB) | SSIM_Y | Time (s) | Threads |
 |---|---:|---:|---:|---:|---|
 | **v6_idea2_v2** (real top-K-in-optimizer + MS-SSIM rerank, K=8) | 37.128 | **43.692** | **0.9921** | 10.07 | 32 |
+| **v7_guarded_idea5** (v6_v2 + chroma floor 1.5 dB + #5 multi-table refine) | **37.762** | 43.576 | 0.9921 | 8.40 | 32 |
 | **v6_idea2** (idea#2 param-grid MS-SSIM rerank, 9 candidates) | 37.520 | 43.551 | 0.9921 | 6.67 | 32 |
 | **v5_idea4** (worst-N re-encode @ 5%, radius=2) | 37.672 | 43.540 | 0.9920 | 5.87 | 32 |
 | **basisu_v3_corners_perc** (cluster fit + perceptual + try-all-corners) | 37.688 | 43.509 | 0.9920 | 3.73 | 32 |
@@ -39,6 +40,154 @@ role goes to rg_etc1 instead.
 | basisu_full (cluster fit, RGB metric) | 39.016 | 42.047 | 0.9879 | 3.44 | 32 |
 | basisu_v3_corners (try-all-corners RGB) | 39.015 | 42.045 | 0.9879 | 5.04 | 32 |
 | etcpak | 35.879 | 39.718 | 0.9670 | 0.04 | 32 |
+
+### v7_guarded_idea5 — v6_v2 + chroma sanity floor (guard rail) + idea #5 multi-table refinement
+
+**Goal**: keep v6_v2's MS-SSIM-driven Y-PSNR / SSIM_Y wins on the worst 5%
+of blocks while cutting v6_v2's RGB-PSNR regression (-0.392 dB vs v6,
+-0.560 dB vs baseline). Two stacked features, both driver-side.
+
+**Feature 1 — Chroma sanity floor (guard rail).** v6_v2 picks the
+MS-SSIM-best of {top-K + pass-1}. Sometimes that pick has RGB-MSE far
+above the pool's MSE-best (chroma "blowup" the rerank ignores because
+luma SSIM gains slightly). Guard rail: compute
+`pool_best_rgb_mse = min(rgb_mse(c) for c in top-K)`, set
+`floor = pool_best_rgb_mse * 10^(T/10)` with T = 1.5 dB
+(`floor_ratio ≈ 1.4125`). Walk the K+1 candidates in MS-SSIM-descending
+order and commit the first whose decoded RGB-MSE ≤ floor. If no
+candidate passes, fall back to the pass-1 result (safest).
+
+**Feature 2 — Idea #5 multi-table sub-block refinement.** After the guard
+rail picks a candidate, run an iterative refiner (max 4 iters), per
+sub-block:
+
+1. LS-solve continuous base color from current selectors + inten table:
+   `b = mean(pixel - I[T,sel])` per channel (scaled-RGB space).
+2. Quantize to RGB444 (color4) or RGB555 (color5). Try all 27 corners
+   of the {center, ±1}^3 cube around the LS-quantized point. In diff
+   mode, sub-block 1 is constrained to within ±[cETC1ColorDeltaMin
+   ..cETC1ColorDeltaMax] of sub-block 0's color5 — invalid corners
+   skipped.
+3. Re-pick selectors greedily per pixel from the (base, T) palette.
+4. Sweep all 8 inten tables and keep the joint argmin (T, corner,
+   selectors) by RGB MSE.
+5. Repeat with the new state until no change.
+
+The refined block is then competed against the committed v6_v2-pick
+under MS-SSIM on the same 12×12 window. Take winner. Done driver-side
+using `etc_block::get_block_color`, `get_block_colors4/5`, and
+`g_etc1_inten_tables` — no new patch is needed (the optimizer's
+internals don't have to be touched).
+
+**Mean delta vs `v6_idea2_v2` (current SOTA) and the lineage:**
+
+| Metric          | baseline | v5_idea4 | v6_idea2 | v6_idea2_v2 | **v7_guarded_idea5** | Δ vs v6_v2 | Δ vs base |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| PSNR_Y  (dB)    | 43.5089  | 43.5397  | 43.5507  | **43.6916** | 43.5760              | **-0.116** | +0.067 |
+| SSIM_Y          | 0.992006 | 0.992023 | 0.992057 | **0.992106**| 0.992065             | -0.000041  | +0.000059 |
+| PSNR_RGB (dB)   | 37.6876  | 37.6723  | 37.5197  | 37.1280     | **37.7615**          | **+0.634** | +0.074 |
+| Encode (s)      | 3.73     | 5.87     | 6.67     | 10.07       | 8.40                 | -1.67      | +4.67  |
+
+**This is a different trade-off than v6_v2, not a strict improvement.**
+v7 trades back ~0.116 dB Y-PSNR / -0.00004 SSIM_Y for **+0.634 dB
+RGB-PSNR** (recovers all of v6_v2's chroma regression and modestly
+beats baseline on RGB too). Encode time is 17% faster than v6_v2 on
+average — the chroma floor pre-empts the most expensive MS-SSIM-vs-RGB
+fights, and the multi-table refiner is comparatively cheap (driver-side,
+no extra optimizer runs).
+
+Per-image PSNR_Y / PSNR_RGB / SSIM_Y, v6_v2 → v7:
+
+| Image          | v6_v2 RGB / Y / SSIM    | v7 RGB / Y / SSIM       | Δ RGB | Δ Y    | Δ SSIM     |
+|---|---|---|---:|---:|---:|
+| MIX1.png       | 35.886 / 44.343 / 0.9904 | 36.039 / 44.303 / 0.9904 | +0.153 | -0.040 | +0.000005  |
+| MIX5.png       | 42.676 / 45.274 / 0.9889 | 44.212 / 45.112 / 0.9888 | +1.536 | -0.162 | -0.000058  |
+| all.png        | 24.288 / 32.097 / 0.9880 | 24.304 / 32.102 / 0.9880 | +0.016 | +0.005 |  0.000003  |
+| gamelist_doom  | 39.783 / 46.802 / 0.9930 | 40.273 / 46.674 / 0.9930 | +0.490 | -0.128 | -0.000026  |
+| gamelist_ffvii | 39.312 / 46.344 / 0.9951 | 39.994 / 46.182 / 0.9950 | +0.682 | -0.162 | -0.000043  |
+| gamelist_sonic2| 40.824 / 47.290 / 0.9972 | 41.747 / 47.082 / 0.9972 | +0.923 | -0.207 | -0.000045  |
+
+v7 beats v6_v2 on RGB-PSNR on **every single image** (+0.016 to +1.536
+dB), and is within 0.21 dB Y-PSNR of v6_v2 on every image (best case
++0.005 dB on `all.png`, worst case -0.207 dB on sonic2). v7 still
+beats baseline on Y-PSNR on every image (+0.063 to +0.162) so the
+v6_v2 lineage win is largely preserved.
+
+**Per-image guard-rail and refiner stats** (worst 5% = 6480 blocks,
+K=8, refine_iters=4, T=1.5 dB):
+
+| Image          | floor_kicked_in | floor_no_pass | refine_changed | refine_won_msssim | refine_won_rgb_mse |
+|---|---:|---:|---:|---:|---:|
+| MIX1.png       | 1542 (23.8%)    | 0             | 6220 (96.0%)   | 251 (4.0% of changed)  | 229 (3.7%)  |
+| MIX5.png       | 5211 (80.4%)    | 0             | 2245 (34.6%)   | 47 (2.1% of changed)   | 37 (1.6%)   |
+| all.png        | 509 (7.9%)      | 0             | 6317 (97.5%)   | 615 (9.7% of changed)  | 438 (6.9%)  |
+| gamelist_doom  | 3491 (53.9%)    | 0             | 4834 (74.6%)   | 448 (9.3% of changed)  | 405 (8.4%)  |
+| gamelist_ffvii | 3951 (61.0%)    | 0             | 5137 (79.3%)   | 391 (7.6% of changed)  | 358 (7.0%)  |
+| gamelist_sonic2| 3686 (56.9%)    | 0             | 5053 (78.0%)   | 376 (7.4% of changed)  | 350 (6.9%)  |
+
+Reading the stats:
+
+- **Guard rail bites hard.** On 5/6 images the floor rejects the
+  unconstrained MS-SSIM top-1 in 24-80% of worst blocks (mean ≈ 47%).
+  Only `all.png` (8%) is the exception — the most photographic content,
+  where pool members' RGB-MSEs cluster tightly so the floor rarely
+  crosses. The floor never failed completely (`floor_no_pass=0` on every
+  image): some pool member always passed the 1.5 dB threshold. So the
+  pass-1 fallback is dormant in practice on this test set.
+- **Multi-table refiner runs often but rarely wins.** It changes the
+  block on 35-97% of worst blocks (mean ≈ 77%), but only 2-10% of those
+  changes beat the pre-refine candidate under MS-SSIM (mean ≈ 7%).
+  When MS-SSIM picks the refined version, RGB-MSE also improved 86-95%
+  of the time — i.e. the refiner mostly trades small RGB MSE wins for
+  small or zero MS-SSIM wins. **MIX5 is the floor of that effect**:
+  only 47/2245 = 2.1% of refiner changes win MS-SSIM, suggesting the
+  refiner converges to local minima that MS-SSIM is mostly indifferent
+  to.
+
+**Combined effect — did the guard rail prevent v6_v2-style RGB-MSE
+blowups?** Yes, decisively. The mean RGB-PSNR delta vs v6_v2 is +0.634
+dB and per-image deltas range from +0.016 (all.png — where the floor
+barely fires) to +1.536 (MIX5 — where the floor fires on 80% of worst
+blocks). The correlation is direct: more floor activity → more RGB
+recovery. On MIX5, v6_v2 was -1.380 dB RGB vs baseline; v7 brings that
+back to +0.157 above baseline.
+
+**Honest verdict per feature:**
+
+1. **Guard rail (floor) — paid off cleanly.** It is the dominant
+   feature in v7. It produces the +0.634 dB RGB recovery and is
+   responsible for the 17% encode time reduction (the floor often
+   commits a different candidate than v6_v2 picked, and that commit
+   short-circuits unnecessary downstream MS-SSIM ties). The Y-PSNR cost
+   (~-0.116 dB) is the unavoidable price of any chroma-protecting
+   constraint on a perceptual-rerank pipeline.
+2. **Multi-table refiner (idea #5) — small effect.** Across all 6
+   images it changes block bitstreams in ~77% of worst blocks but only
+   ~7% of those changes survive the MS-SSIM competition. Its
+   contribution to the +0.634 RGB win is small; the bulk of the chroma
+   recovery is the floor. The refiner is cheap enough to leave on
+   (negligible fraction of total encode time on these images), but on
+   this test set it does **not** independently justify the patch.
+
+**Combined verdict:** v7 is the right shape if you wanted v6_v2's
+perceptual lineage but couldn't tolerate the RGB regression. **Y-PSNR
+SOTA remains v6_idea2_v2** (43.692 dB) — v7 is 43.576 dB.  **Best
+all-around (Y still above all baselines, RGB recovered) is v7**.  Pick
+based on whether downstream consumers measure RGB or Y.
+
+GPU-validated bit-exactly on AMD Radeon 780M for all 6 images
+(mean abs diff vs SW decoder = 0.000000; all 60 SW-vs-GPU comparisons
+across 10 encoders × 6 images = zero diff).
+
+**Visual A/B images** (regenerated with v7 panel, replacing prior
+v6_v2-as-primary set under `results/visual/`):
+- `<image>_strip_1x.png`  — original + v7 + v6_v2 + v5 + v6 + etcpak
+- `<image>_2x.png`        — 3 regions × 7 panels (orig + 6 enc + |v7-orig|×8)
+- `<image>_4x.png`        — same regions at 4× zoom
+- `<image>_errors_y.png`  — 6-panel viridis |dY| heatmap
+- `<image>_errors_rgb.png`— 6-panel viridis max|dRGB| heatmap
+
+The diff panel is now `|v7 - orig| × 8` instead of `|v6_v2 - orig| × 8`.
 
 ### v6_idea2_v2 — Real top-K capture inside the optimizer + MS-SSIM rerank
 

@@ -574,5 +574,59 @@
     "psnr_y": 42.199,
     "ssim_y": 0.9769,
     "encode_seconds": 2.09
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "v7_guarded_idea5",
+    "encode_seconds": 6.384,
+    "psnr_rgb": 36.0389,
+    "psnr_y": 44.303,
+    "ssim_y": 0.9904,
+    "mse_rgb": 16.188
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "v7_guarded_idea5",
+    "encode_seconds": 6.796,
+    "psnr_rgb": 44.2117,
+    "psnr_y": 45.1119,
+    "ssim_y": 0.9888,
+    "mse_rgb": 2.4655
+  },
+  {
+    "image": "all.png",
+    "encoder": "v7_guarded_idea5",
+    "encode_seconds": 10.843,
+    "psnr_rgb": 24.3043,
+    "psnr_y": 32.1023,
+    "ssim_y": 0.988,
+    "mse_rgb": 241.351
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "v7_guarded_idea5",
+    "encode_seconds": 9.748,
+    "psnr_rgb": 40.2734,
+    "psnr_y": 46.6737,
+    "ssim_y": 0.993,
+    "mse_rgb": 6.1057
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "v7_guarded_idea5",
+    "encode_seconds": 8.849,
+    "psnr_rgb": 39.9939,
+    "psnr_y": 46.1824,
+    "ssim_y": 0.995,
+    "mse_rgb": 6.5116
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "v7_guarded_idea5",
+    "encode_seconds": 7.786,
+    "psnr_rgb": 41.7466,
+    "psnr_y": 47.0824,
+    "ssim_y": 0.9972,
+    "mse_rgb": 4.3493
   }
 ]
