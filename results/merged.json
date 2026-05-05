@@ -1,0 +1,194 @@
+[
+  {
+    "image": "MIX1.png",
+    "encoder": "etcpak",
+    "psnr_rgb": 34.703,
+    "psnr_y": 41.543,
+    "ssim_y": 0.9469,
+    "encode_seconds": 0.05
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "etcpak",
+    "psnr_rgb": 41.415,
+    "psnr_y": 41.415,
+    "ssim_y": 0.9294,
+    "encode_seconds": 0.03
+  },
+  {
+    "image": "all.png",
+    "encoder": "etcpak",
+    "psnr_rgb": 23.443,
+    "psnr_y": 29.727,
+    "ssim_y": 0.9804,
+    "encode_seconds": 0.05
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "etcpak",
+    "psnr_rgb": 38.782,
+    "psnr_y": 42.768,
+    "ssim_y": 0.9837,
+    "encode_seconds": 0.03
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "etcpak",
+    "psnr_rgb": 38.189,
+    "psnr_y": 42.029,
+    "ssim_y": 0.9713,
+    "encode_seconds": 0.03
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "etcpak",
+    "psnr_rgb": 38.744,
+    "psnr_y": 40.825,
+    "ssim_y": 0.9905,
+    "encode_seconds": 0.03
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "rg_etc1_hq",
+    "psnr_rgb": 37.657,
+    "psnr_y": 41.639,
+    "ssim_y": 0.9844,
+    "encode_seconds": 21.75
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "rg_etc1_hq",
+    "psnr_rgb": 45.153,
+    "psnr_y": 45.153,
+    "ssim_y": 0.9926,
+    "encode_seconds": 19.89
+  },
+  {
+    "image": "all.png",
+    "encoder": "rg_etc1_hq",
+    "psnr_rgb": 25.299,
+    "psnr_y": 29.999,
+    "ssim_y": 0.9794,
+    "encode_seconds": 30.84
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "rg_etc1_hq",
+    "psnr_rgb": 42.042,
+    "psnr_y": 45.631,
+    "ssim_y": 0.9913,
+    "encode_seconds": 19.5
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "rg_etc1_hq",
+    "psnr_rgb": 41.9,
+    "psnr_y": 44.671,
+    "ssim_y": 0.9931,
+    "encode_seconds": 13.45
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "rg_etc1_hq",
+    "psnr_rgb": 43.325,
+    "psnr_y": 46.089,
+    "ssim_y": 0.996,
+    "encode_seconds": 9.76
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "basisu_full",
+    "psnr_rgb": 37.444,
+    "psnr_y": 41.521,
+    "ssim_y": 0.9818,
+    "encode_seconds": 2.84
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "basisu_full",
+    "psnr_rgb": 44.897,
+    "psnr_y": 44.897,
+    "ssim_y": 0.9885,
+    "encode_seconds": 2.82
+  },
+  {
+    "image": "all.png",
+    "encoder": "basisu_full",
+    "psnr_rgb": 25.245,
+    "psnr_y": 30.068,
+    "ssim_y": 0.9798,
+    "encode_seconds": 5.7
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "basisu_full",
+    "psnr_rgb": 41.885,
+    "psnr_y": 45.495,
+    "ssim_y": 0.991,
+    "encode_seconds": 3.08
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "basisu_full",
+    "psnr_rgb": 41.57,
+    "psnr_y": 44.452,
+    "ssim_y": 0.9907,
+    "encode_seconds": 3.3
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "basisu_full",
+    "psnr_rgb": 43.056,
+    "psnr_y": 45.847,
+    "ssim_y": 0.9957,
+    "encode_seconds": 2.88
+  },
+  {
+    "image": "MIX1.png",
+    "encoder": "etc2comp_e100",
+    "psnr_rgb": 37.531,
+    "psnr_y": 41.638,
+    "ssim_y": 0.9842,
+    "encode_seconds": 89.36
+  },
+  {
+    "image": "MIX5.png",
+    "encoder": "etc2comp_e100",
+    "psnr_rgb": 45.145,
+    "psnr_y": 45.145,
+    "ssim_y": 0.9926,
+    "encode_seconds": 39.67
+  },
+  {
+    "image": "all.png",
+    "encoder": "etc2comp_e100",
+    "psnr_rgb": 24.963,
+    "psnr_y": 29.902,
+    "ssim_y": 0.9795,
+    "encode_seconds": 32.03
+  },
+  {
+    "image": "gamelist_doom.png",
+    "encoder": "etc2comp_e100",
+    "psnr_rgb": 41.946,
+    "psnr_y": 45.483,
+    "ssim_y": 0.9914,
+    "encode_seconds": 29.05
+  },
+  {
+    "image": "gamelist_final_fantasy_vii.png",
+    "encoder": "etc2comp_e100",
+    "psnr_rgb": 41.797,
+    "psnr_y": 44.42,
+    "ssim_y": 0.9929,
+    "encode_seconds": 28.81
+  },
+  {
+    "image": "gamelist_sonic2.png",
+    "encoder": "etc2comp_e100",
+    "psnr_rgb": 43.273,
+    "psnr_y": 45.894,
+    "ssim_y": 0.996,
+    "encode_seconds": 18.02
+  }
+]

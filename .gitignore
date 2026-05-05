@@ -1,0 +1,22 @@
+# Source image clones (huge)
+src_images/
+# Encoder upstream clones (huge, vendored as needed)
+encoders/basis_universal/
+encoders/etcpak/
+encoders/etc2comp/
+encoders/ETCPACK/
+encoders/rg-etc1/
+# stb headers downloaded as deps
+encoders/stb_image.h
+encoders/stb_image_write.h
+# Build artifacts
+build/
+venv/
+# Per-encoder decoded PNGs (regenerable, large)
+decoded/
+# Test images we cherry-picked (we'll keep references via README)
+test_images/
+# Backup
+encoders/basisu_etc_orig.cpp.bak
+results/results.json
+*.log
