@@ -1,0 +1,79 @@
+UberETC1 research-branch — idea #2 (real top-K capture inside the optimizer).
+
+Stacks on 0002-wide-corner-radius. The header thread-locals
+(g_uberetc1_topk_capture, g_uberetc1_topk_buffer) and the
+uberetc1_topk_entry struct are already present in basisu_etc.h /
+basisu_etc.cpp on the research branch. What was missing: the actual
+push site.
+
+This patch adds the push inside evaluate_solution_slow(). When
+g_uberetc1_topk_capture > 0, every successful per-color-coord trial
+(after the 8-inten-table sweep — i.e. trial_solution holds the best
+(inten, color, selectors) for that color coord) is appended to
+g_uberetc1_topk_buffer. The buffer is bounded to capture-K via a
+linear worst-evict policy.
+
+Driver flow (driver-side):
+  - clear g_uberetc1_topk_buffer
+  - g_uberetc1_topk_capture = K
+  - run optimizer (cluster_fit at radius=R)
+  - read top-K entries from buffer (already bounded)
+  - g_uberetc1_topk_capture = 0
+
+Apply (after 0001 + 0002 are already applied):
+    patch -p1 -d encoders/basis_universal < patches/0003-real-topk-capture.patch
+
+--- a/encoder/basisu_etc.cpp
++++ b/encoder/basisu_etc.cpp
+@@ -1309,7 +1309,52 @@ namespace basisu
+ 		}
+ 		trial_solution.m_coords.m_unscaled_color = coords.m_unscaled_color;
+ 		trial_solution.m_coords.m_color4 = m_pParams->m_use_color4;
+-
++
++		// UberETC1 idea #2 — real top-K capture.
++		// When g_uberetc1_topk_capture > 0, every successful per-coord trial
++		// is appended to g_uberetc1_topk_buffer. Buffer is bounded to at
++		// most K entries via worst-evict (K small, so O(K) per push).
++		if (g_uberetc1_topk_capture > 0 && trial_solution.m_valid)
++		{
++			const int K = g_uberetc1_topk_capture;
++			const uint64_t err_here = trial_solution.m_error;
++			const uint32_t n_sel = (uint32_t)trial_solution.m_selectors.size();
++			if (n_sel == 8)
++			{
++				if ((int)g_uberetc1_topk_buffer.size() < K)
++				{
++					uberetc1_topk_entry e;
++					e.m_error = err_here;
++					e.m_inten_table = trial_solution.m_coords.m_inten_table;
++					e.m_color_unscaled = trial_solution.m_coords.m_unscaled_color;
++					e.m_color4 = m_pParams->m_use_color4;
++					for (uint32_t i = 0; i < 8; ++i)
++						e.m_selectors[i] = trial_solution.m_selectors[i];
++					g_uberetc1_topk_buffer.push_back(e);
++				}
++				else
++				{
++					uint32_t worst_i = 0;
++					uint64_t worst_e = g_uberetc1_topk_buffer[0].m_error;
++					for (uint32_t i = 1; i < g_uberetc1_topk_buffer.size(); ++i)
++						if (g_uberetc1_topk_buffer[i].m_error > worst_e)
++							{ worst_e = g_uberetc1_topk_buffer[i].m_error; worst_i = i; }
++					if (err_here < worst_e)
++					{
++						uberetc1_topk_entry &e = g_uberetc1_topk_buffer[worst_i];
++						e.m_error = err_here;
++						e.m_inten_table = trial_solution.m_coords.m_inten_table;
++						e.m_color_unscaled = trial_solution.m_coords.m_unscaled_color;
++						e.m_color4 = m_pParams->m_use_color4;
++						for (uint32_t i = 0; i < 8; ++i)
++							e.m_selectors[i] = trial_solution.m_selectors[i];
++					}
++				}
++			}
++		}
++
+ #if BASISU_DEBUG_ETC_ENCODER_DEEPER
+ 		printf("Eval done: %u error: %I64u best error so far: %I64u\n", (trial_solution.m_error < pBest_solution->m_error), trial_solution.m_error, pBest_solution->m_error);
+ #endif

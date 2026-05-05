@@ -29,7 +29,8 @@ role goes to rg_etc1 instead.
 
 | Encoder | PSNR_RGB (dB) | PSNR_Y (dB) | SSIM_Y | Time (s) | Threads |
 |---|---:|---:|---:|---:|---|
-| **v6_idea2** (idea#2 MS-SSIM rerank stacked on v5_idea4) | 37.520 | **43.551** | **0.9920** | 6.67 | 32 |
+| **v6_idea2_v2** (real top-K-in-optimizer + MS-SSIM rerank, K=8) | 37.128 | **43.692** | **0.9921** | 10.07 | 32 |
+| **v6_idea2** (idea#2 param-grid MS-SSIM rerank, 9 candidates) | 37.520 | 43.551 | 0.9921 | 6.67 | 32 |
 | **v5_idea4** (worst-N re-encode @ 5%, radius=2) | 37.672 | 43.540 | 0.9920 | 5.87 | 32 |
 | **basisu_v3_corners_perc** (cluster fit + perceptual + try-all-corners) | 37.688 | 43.509 | 0.9920 | 3.73 | 32 |
 | basisu_full_perc (cluster fit + perceptual) | 37.983 | 43.378 | 0.9919 | 1.15 | 32 |
@@ -38,6 +39,129 @@ role goes to rg_etc1 instead.
 | basisu_full (cluster fit, RGB metric) | 39.016 | 42.047 | 0.9879 | 3.44 | 32 |
 | basisu_v3_corners (try-all-corners RGB) | 39.015 | 42.045 | 0.9879 | 5.04 | 32 |
 | etcpak | 35.879 | 39.718 | 0.9670 | 0.04 | 32 |
+
+### v6_idea2_v2 — Real top-K capture inside the optimizer + MS-SSIM rerank
+
+**v6_idea2 was a wash (+0.011 dB Y-PSNR vs v5).** Hypothesis (per the v6
+post-mortem): the 9 candidates in v6 came from cluster_fit's MSE-optimal
+output for each (flip, diff, radius) parameter slice — already nearly
+indistinguishable under MSE *or* MS-SSIM. Real top-K diversity required
+draining the per-color-coord trial heap from inside the optimizer's
+inner loop. v6_idea2_v2 implements that.
+
+**Patch `0003-real-topk-capture.patch`** wires the push site inside
+`evaluate_solution_slow()`. When `g_uberetc1_topk_capture > 0`, every
+successful per-color-coord trial (after the 8-inten-table sweep, so the
+captured entry is the best (color, inten, selectors) for that color
+coord) appends to `g_uberetc1_topk_buffer`. Buffer is bounded to K via
+worst-evict. Header types (`uberetc1_topk_entry`, the thread-locals)
+were already in place — only the push was missing.
+
+**Driver pass-2** (per worst block, top 5% by Y-MSE):
+
+For each (flip, diff) in {0,1}^2:
+  1. Run sub-block 0's optimizer at radius=R=2 with `topk_capture=K=8`.
+     Drain `buf0` = up to 8 (color, inten, selectors, perc_err) entries
+     — the global top-K across all 165 perms × 125 corners × 8 inten
+     tables for that sub-block.
+  2. If `diff=0` (color4 / individual mode): sub-block 1 is independent.
+     Run once with `topk_capture=K`, drain `buf1`. Combine `buf0 × buf1`
+     → up to K×K = 64 full-block candidates.
+  3. If `diff=1` (color5 / diff mode): sub-block 1 must respect
+     `m_constrain_against_base_color5` from sub-block 0's chosen color.
+     For each entry e0 in `buf0`, run sub-block 1 *constrained against
+     e0's color5* with topk_capture=K → buf1 of K entries. Combine each
+     e0 with each of those K. Total: K×K candidates per (diff=1).
+
+Pool all candidates (≤ 4 × 64 = 256) into a global heap of size K=8
+keyed by total perceptual error (e0.err + e1.err). Add the pass-1
+result as candidate K+1 (sentinel ranking), giving 9 candidates total.
+MS-SSIM-rerank K+1 candidates with same 12×12 (3×3-block) window +
+pass-1-neighbor context as v6_idea2. Pick winner. Commit.
+
+**Mean delta vs `v6_idea2` (the wash) and `v5_idea4` (prior SOTA):**
+
+| Metric          | baseline | v5_idea4 | v6_idea2 | **v6_idea2_v2** | Δ vs v5 | Δ vs v6 |
+|---|---:|---:|---:|---:|---:|---:|
+| PSNR_Y  (dB)    | 43.5089  | 43.5397  | 43.5507  | **43.6916**     | **+0.152** | **+0.141** |
+| SSIM_Y          | 0.992006 | 0.992023 | 0.992057 | **0.992106**    | +0.000083  | +0.000049  |
+| PSNR_RGB (dB)   | 37.6876  | 37.6723  | 37.5197  | 37.1280         | -0.544     | -0.392     |
+| Encode (s)      | 3.73     | 5.87     | 6.67     | 10.07           | +4.20      | +3.40      |
+
+This is a **real win** on Y-PSNR / SSIM_Y, an order of magnitude bigger
+than v6_idea2's +0.011 dB Y over v5. SSIM_Y now moves at 5-decimal
+precision (0.99206 → 0.99211). PSNR_RGB regresses meaningfully
+(-0.392 dB vs v6, -0.544 dB vs baseline) — the perceptual rerank trades
+RGB-MSE for luma quality more aggressively when given diverse candidates.
+
+Per-image PSNR_Y and SSIM_Y, baseline → v5_idea4 → v6_idea2 → v6_idea2_v2:
+
+| Image          | baseline           | v5_idea4           | v6_idea2           | v6_idea2_v2        | Δ Y vs base | Δ Y vs v5 | Δ Y vs v6 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| MIX1.png       | 44.1413 / 0.990253 | 44.1640 / 0.990277 | 44.2205 / 0.990342 | 44.3435 / 0.990422 | +0.202 | +0.180 | +0.123 |
+| MIX5.png       | 45.1355 / 0.988801 | 45.1473 / 0.988805 | 45.1191 / 0.988792 | 45.2739 / 0.988882 | +0.138 | +0.127 | +0.155 |
+| all.png        | 32.0397 / 0.987876 | 32.0562 / 0.987909 | 32.1238 / 0.988034 | 32.0967 / 0.987982 | +0.057 | +0.040 | -0.027 |
+| gamelist_doom  | 46.6077 / 0.992956 | 46.6407 / 0.992968 | 46.6447 / 0.992988 | 46.8022 / 0.993047 | +0.195 | +0.162 | +0.158 |
+| gamelist_ffvii | 46.1055 / 0.995003 | 46.1551 / 0.995019 | 46.1390 / 0.995023 | 46.3437 / 0.995077 | +0.238 | +0.189 | +0.205 |
+| gamelist_sonic2| 47.0237 / 0.997146 | 47.0751 / 0.997162 | 47.0569 / 0.997166 | 47.2896 / 0.997227 | +0.266 | +0.214 | +0.233 |
+
+v6_idea2_v2 beats v6_idea2 on Y-PSNR on 5 of 6 images (regresses by
+-0.027 dB only on `all.png`, the most photographic / hardest content).
+SSIM_Y improves on 5 of 6 (small regression on `all.png` only).
+
+Per-image pass-2 internal stats (worst 5% = 6480 blocks, K=8):
+
+| Image          | pool size | kept_pass1 | kept_pass2 | msssim_diverged_from_pool_top1 | Y-MSE_regressed | **winner_outside_v6_grid** |
+|---|---:|---:|---:|---:|---:|---:|
+| MIX1.png       | 8.00 | 248 | 6232 | 5319 (82.1%) | 785 (12.1%) | **5099 (78.7%)** |
+| MIX5.png       | 8.00 |  65 | 6415 | 5573 (86.0%) | 912 (14.1%) | **5378 (83.0%)** |
+| all.png        | 8.00 | 308 | 6172 | 5480 (84.6%) | 1013 (15.6%) | **5354 (82.6%)** |
+| gamelist_doom  | 8.00 | 175 | 6305 | 5197 (80.2%) | 702 (10.8%) | **5117 (79.0%)** |
+| gamelist_ffvii | 8.00 | 204 | 6276 | 5194 (80.2%) | 633 (9.8%)  | **5239 (80.8%)** |
+| gamelist_sonic2| 8.00 | 232 | 6248 | 5025 (77.5%) | 844 (13.0%) | **4990 (77.0%)** |
+
+**The "winner_outside_v6_grid" stat is the headline diversity result.**
+For each worst block we re-encode v6_idea2's full 8-candidate parameter
+grid ({flip,diff,radius∈{1,2}}) — the candidates v6_idea2 considers —
+plus the pass-1 result, and check whether the v6_idea2_v2 MS-SSIM
+winner's bitstream matches any of them.
+
+**77-83% of worst blocks have a winner that v6_idea2 would have missed.**
+That is, in 5/6 of worst-block decisions, the real top-K-from-the-optimizer
+finds a candidate (different inten table, different selector pattern,
+different non-MSE-optimal base color, etc.) that the parameter-grid
+approximation never produces. This directly validates the prior agent's
+hypothesis: v6_idea2 was a wash because its 9 candidates were
+"already very close in perceptual error" — the per-slice MSE-best is
+nearly indistinguishable under MS-SSIM. Real top-K gives the rerank
+genuinely diverse alternatives.
+
+`msssim_diverged_from_pool_top1` is also informative: in 78-86% of
+worst blocks, MS-SSIM picks a candidate that is NOT the MSE-best of
+the K-pool. That is, even within the K=8 perceptually-best (by basisu's
+YCbCr metric) candidates, MS-SSIM ranks them differently — the K=8
+pool is doing the right job of giving the rerank meaningful alternatives.
+
+GPU-validated bit-exactly on AMD Radeon 780M for all 6 images
+(mean abs diff vs SW decoder = 0.000000 — same machine config as
+prior runs, all 9 encoders × 6 images = 54 SW-vs-GPU comparisons,
+every one zero diff).
+
+**Verdict: real top-K-in-the-optimizer is the missing piece.** v6_idea2's
+parameter-grid was approximating top-K with parameter-slice top-1, which
+collapsed the diversity needed to make MS-SSIM rerank pay off. The actual
+top-K, drained from `evaluate_solution_slow()`'s inner trial loop,
+delivers +0.141 dB Y-PSNR / +0.00005 SSIM_Y over v6_idea2, with the win
+present on 5/6 images. The trade-off is -0.392 dB PSNR_RGB vs v6_idea2
+and ~50% extra encode time (4 (flip,diff) × K runs of sub-block-1 in
+diff mode + K^2 candidate construction per (flip,diff)).
+
+The `all.png` regression (-0.027 dB Y) is interesting: it's the lowest-
+PSNR image (32 dB Y) — a busy photographic background. On this content
+even the diverse top-K candidates are all far enough from the source
+that MS-SSIM and Y-MSE diverge in ways that occasionally favor a
+visually-different-but-luma-worse candidate. The other 5 images
+(graphic / illustrated content with more flat/edged regions) all gain.
 
 ### v6_idea2 — Idea #2 (MS-SSIM top-K rerank), stacked on v5_idea4
 

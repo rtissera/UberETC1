@@ -55,6 +55,12 @@ ENCODERS = {
     # radius∈{1,2}) plus the pass-1 result, reranks by MS-SSIM_Y on a 12×12
     # (3×3 block) window using already-pass-1-encoded neighbors as context.
     "v6_idea2":          str(BUILD / "basisu_etc1_tool_v6"),
+    # research-branch v6_v2: REAL top-K capture inside the optimizer
+    # (g_uberetc1_topk_capture/buffer wired up in evaluate_solution_slow).
+    # Per worst block: pull top-K=8 (color, inten, selectors) per sub-block
+    # for each (flip, diff), combine into K×K full-block candidates, pool
+    # global top-K=8 by perceptual error, MS-SSIM-rerank K+1 (K + pass-1).
+    "v6_idea2_v2":       str(BUILD / "basisu_etc1_tool_v6_v2"),
 }
 
 def run(cmd, timeout=600):
@@ -155,6 +161,20 @@ def encode_decode(name, src_png, work_dir):
         t0 = time.time()
         subprocess.run([ENCODERS[name], "encode", str(src_png), str(bin_path)],
                        env=env, capture_output=True, timeout=900)
+        t_enc = time.time() - t0
+        subprocess.run([ENCODERS[name], "decode", str(bin_path), str(dec_png)],
+                       env=env, capture_output=True, timeout=120)
+        return dec_png, t_enc
+
+    if name == "v6_idea2_v2":
+        bin_path = work_dir / "out.bin"
+        env = {**os.environ,
+               "UBERETC1_WORST_PCT": "5.0",
+               "UBERETC1_WORST_RADIUS": "2",
+               "UBERETC1_TOPK": "8"}
+        t0 = time.time()
+        subprocess.run([ENCODERS[name], "encode", str(src_png), str(bin_path)],
+                       env=env, capture_output=True, timeout=1800)
         t_enc = time.time() - t0
         subprocess.run([ENCODERS[name], "decode", str(bin_path), str(dec_png)],
                        env=env, capture_output=True, timeout=120)
