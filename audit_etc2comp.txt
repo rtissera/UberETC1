@@ -1,0 +1,139 @@
+==========================================
+ etc2comp — enhancement audit
+==========================================
+Source root: /home/romain/etc1_bench/encoders/etc2comp/EtcLib
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/Etc/EtcColorFloatRGBA.h
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/Etc/EtcColor.h
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/Etc/EtcConfig.h
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/Etc/Etc.cpp
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/Etc/EtcFilter.cpp
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/Etc/EtcFilter.h
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/Etc/Etc.h
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/Etc/EtcImage.cpp
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/Etc/EtcImage.h
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/Etc/EtcMath.cpp
+
+--- A. Block archetype classification ---
+(this is etc2comp's headline feature)
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:27:	// base class for Block4x4Encoding_RGB8
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:28:	class Block4x4Encoding_ETC1 : public Block4x4Encoding
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:28:	class Block4x4;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:31:	class Block4x4Encoding
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcSortedBlockList.h:21:	class Block4x4;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcSortedBlockList.h:23:    class SortedBlockList
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.h:31:	class Block4x4Encoding_RGB8A1 : public Block4x4Encoding_RGB8
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.h:102:	class Block4x4Encoding_RGB8A1_Opaque : public Block4x4Encoding_RGB8A1
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.h:119:	class Block4x4Encoding_RGB8A1_Transparent : public Block4x4Encoding_RGB8A1
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4EncodingBits.h:26:	// Base class for Block4x4EncodingBits_XXXX
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4EncodingBits.h:29:	class Block4x4EncodingBits
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4EncodingBits.h:75:	class Block4x4EncodingBits_RGB8
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4EncodingBits.h:227:	class Block4x4EncodingBits_A8
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4EncodingBits.h:256:	class Block4x4EncodingBits_R11
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4EncodingBits.h:280:	class Block4x4EncodingBits_RG11
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4.h:27:	class Block4x4EncodingBits;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4.h:29:	class Block4x4
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_R11.h:23:	class Block4x4EncodingBits_R11;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_R11.h:29:	class Block4x4Encoding_R11 : public Block4x4Encoding_RGB8
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGBA8.h:23:	class Block4x4EncodingBits_A8;
+
+  Per-block-type encoding paths:
+
+  Effort parameter implementation:
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:47:		virtual void PerformIteration(float a_fEffort);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:71:		virtual void PerformIteration(float a_fEffort) = 0;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:227:	// set m_boolDone if encoding is perfect or encoding is finished based on a_fEffort
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:229:	void Block4x4Encoding_RGB8::PerformIteration(float a_fEffort)
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:268:			if (a_fEffort <= 49.5f)
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:276:			if (a_fEffort <= 59.5f)
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:284:			if (a_fEffort <= 69.5f)
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:292:			if (a_fEffort <= 79.5f)
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:300:			if (a_fEffort <= 89.5f)
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.h:50:		virtual void PerformIteration(float a_fEffort);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.h:106:		virtual void PerformIteration(float a_fEffort);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.h:123:		virtual void PerformIteration(float a_fEffort);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4.h:65:		inline void PerformEncodingIteration(float a_fEffort)
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4.h:67:			m_pencoding->PerformIteration(a_fEffort);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcSortedBlockList.cpp:20:SortedBlockList is a list of 4x4 blocks that can be used by the "effort" system to prioritize
+
+--- B. Error metrics ---
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:36:									ColorFloatRGBA *a_pafrgbaSource,
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:39:									ErrorMetric a_errormetric);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:43:											ColorFloatRGBA *a_pafrgbaSource, 
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:45:											ErrorMetric a_errormetric);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:63:		inline ColorFloatRGBA GetColor1(void) const
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:68:		inline ColorFloatRGBA GetColor2(void) const
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:138:		inline float CalcGrayDistance2(ColorFloatRGBA &r_frgbaPixel, 
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:139:										ColorFloatRGBA &r_frgbaTarget)
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:145:			ColorFloatRGBA frgbaPointOnGrayLine = (r_frgbaTarget + fDeltaGray).ClampRGB();
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:159:		ColorFloatRGBA	m_frgbaColor1;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:160:		ColorFloatRGBA	m_frgbaColor2;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:166:		ColorFloatRGBA	m_frgbaSourceAverageLeft;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:167:		ColorFloatRGBA	m_frgbaSourceAverageRight;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:168:		ColorFloatRGBA	m_frgbaSourceAverageTop;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:169:		ColorFloatRGBA	m_frgbaSourceAverageBottom;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:19:#include "EtcColorFloatRGBA.h"
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:21:#include "EtcErrorMetric.h"
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:59:									ColorFloatRGBA *a_pafrgbaSource,
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:61:									unsigned char *a_paucEncodingBits, ErrorMetric a_errormetric) = 0;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:65:											ColorFloatRGBA *a_pafrgbaSource,
+
+  rec709 luma weights:
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.cpp:159:			float fLuma1 = a_frgbaSourcePixel.fR*0.2126f + a_frgbaSourcePixel.fG*0.7152f + a_frgbaSourcePixel.fB*0.0722f;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.cpp:160:			float fChromaR1 = 0.5f * ((a_frgbaSourcePixel.fR - fLuma1) * (1.0f / (1.0f - 0.2126f)));
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.cpp:161:			float fChromaB1 = 0.5f * ((a_frgbaSourcePixel.fB - fLuma1) * (1.0f / (1.0f - 0.0722f)));
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.cpp:163:			float fLuma2 = a_frgbaDecodedColor.fR*0.2126f +
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.cpp:164:							a_frgbaDecodedColor.fG*0.7152f +
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.cpp:165:							a_frgbaDecodedColor.fB*0.0722f;
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.cpp:166:			float fChromaR2 = 0.5f * ((a_frgbaDecodedColor.fR - fLuma2) * (1.0f / (1.0f - 0.2126f)));
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.cpp:167:			float fChromaB2 = 0.5f * ((a_frgbaDecodedColor.fB - fLuma2) * (1.0f / (1.0f - 0.0722f)));
+
+--- C. ETC1-specific path ---
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:28:	class Block4x4Encoding_ETC1 : public Block4x4Encoding
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:32:		Block4x4Encoding_ETC1(void);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:33:		virtual ~Block4x4Encoding_ETC1(void);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:45:			MODE_ETC1,
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:23:Block4x4Encoding_ETC1 encodes the ETC1 subset of RGB8.
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:77:		// handle ETC1 modes
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:78:		Block4x4Encoding_ETC1::InitFromEncodingBits(a_pblockParent,
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:136:		Block4x4Encoding_ETC1::InitFromEncodingBits_Selectors();
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:177:		Block4x4Encoding_ETC1::InitFromEncodingBits_Selectors();
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:236:			Block4x4Encoding_ETC1::PerformFirstIteration();
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:251:			Block4x4Encoding_ETC1::TryDifferential(m_boolMostLikelyFlip, 1, 0, 0);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:255:			Block4x4Encoding_ETC1::TryIndividual(m_boolMostLikelyFlip, 1);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:259:			Block4x4Encoding_ETC1::TryDifferential(!m_boolMostLikelyFlip, 1, 0, 0);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:263:			Block4x4Encoding_ETC1::TryIndividual(!m_boolMostLikelyFlip, 1);
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:283:			Block4x4Encoding_ETC1::TryDegenerates1();
+
+--- D. YCoCg ---
+
+--- E. Joint sub-block / iterative refinement ---
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_ETC1.h:165:		// state shared between iterations
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:69:		// perform an iteration of the encoding
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:70:		// the first iteration must generate a complete, valid (if poor) encoding
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding.h:141:		bool			m_boolDone;						// all iterations have been done
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:224:	// perform a single encoding iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8.cpp:226:	// subsequent iterations generally take longer for each iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4.h:64:		// return true if final iteration was performed
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGBA8.cpp:162:	// perform a single encoding iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGBA8.cpp:164:	// subsequent iterations generally take longer for each iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGBA8.cpp:374:	// perform a single encoding iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGBA8.cpp:376:	// subsequent iterations generally take longer for each iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGBA8.cpp:424:	// perform a single encoding iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGBA8.cpp:426:	// subsequent iterations generally take longer for each iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.cpp:416:	// perform a single encoding iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.cpp:418:	// subsequent iterations generally take longer for each iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.cpp:1657:	// perform a single encoding iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.cpp:1659:	// subsequent iterations generally take longer for each iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.cpp:1780:	// perform a single encoding iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_RGB8A1.cpp:1782:	// subsequent iterations generally take longer for each iteration
+/home/romain/etc1_bench/encoders/etc2comp/EtcLib/EtcCodec/EtcBlock4x4Encoding_R11.cpp:165:	// perform a single encoding iteration
+
+--- F. SSIM ---
+
+--- G. Branch-and-bound ---
+
+--- H. Dithering ---
+
+--- I. Saliency / attention ---
+
+Audit complete.

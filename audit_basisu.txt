@@ -1,0 +1,122 @@
+==========================================
+ basis_universal — enhancement audit
+==========================================
+Source root: /home/romain/etc1_bench/encoders/basis_universal/encoder
+Files scanned: basisu_etc.{h,cpp}, basisu_enc.{h,cpp}, basisu_frontend.cpp
+
+--- A. Adaptive per-block effort ---
+Look for: classifying blocks before encode, branching on flat vs edge, etc.
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.h:1109:	void pack_etc1_solid_color_init();
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.h:1110:	uint64_t pack_etc1_block_solid_color(etc_block& block, const uint8_t* pColor);
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:129:	void pack_etc1_solid_color_init()
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:179:	// Packs solid color blocks efficiently using a set of small precomputed tables.
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:181:	uint64_t pack_etc1_block_solid_color(etc_block& block, const uint8_t* pColor)
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_enc.h:3257:	inline bool is_solid_block(uint32_t n, const color_rgba* pPixels)
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_enc.cpp:206:		pack_etc1_solid_color_init();
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_frontend.cpp:563:		// Make sure the selector codebook always has pure flat blocks for each possible selector, to avoid obvious artifacts.
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_frontend.cpp:592:				// See if using flat selectors actually decreases the block's error.
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_frontend.cpp:653:		debug_printf("Total blocks relocated to new flat selector clusters: %u\n", total_blocks_relocated);
+
+  pack_etc1_block_solid_color: defined?
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.h:1110:	uint64_t pack_etc1_block_solid_color(etc_block& block, const uint8_t* pColor);
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:181:	uint64_t pack_etc1_block_solid_color(etc_block& block, const uint8_t* pColor)
+  -> Used as a fast path? Check call sites:
+/home/romain/etc1_bench/encoders/basis_universal/encoder/../encoder/basisu_uastc_enc.cpp:2720:			pack_etc1_block_solid_color(best_etc1_blk, &best_results.m_solid_color.m_comps[0]);
+/home/romain/etc1_bench/encoders/basis_universal/encoder/../encoder/basisu_uastc_enc.cpp:3166:			pack_etc1_block_solid_color(etc1_blk, &first_color.m_comps[0]);
+/home/romain/etc1_bench/encoders/basis_universal/encoder/../encoder/basisu_etc.cpp:181:	uint64_t pack_etc1_block_solid_color(etc_block& block, const uint8_t* pColor)
+/home/romain/etc1_bench/encoders/basis_universal/encoder/../encoder/basisu_etc.h:1110:	uint64_t pack_etc1_block_solid_color(etc_block& block, const uint8_t* pColor);
+
+--- B. Cluster-fit distribution count (165) ---
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.h:1101:		void compute_internal_cluster_fit(uint32_t total_perms_to_try);
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:265:	const uint32_t BASISU_ETC1_CLUSTER_FIT_ORDER_TABLE_SIZE = 165;
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:267:	static const struct { uint8_t m_v[4]; } g_cluster_fit_order_tab[BASISU_ETC1_CLUSTER_FIT_ORDER_TABLE_SIZE] =
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:792:				compute_internal_cluster_fit(4);
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:794:				compute_internal_cluster_fit(16);
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:796:				compute_internal_cluster_fit(64);
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:798:				compute_internal_cluster_fit(BASISU_ETC1_CLUSTER_FIT_ORDER_TABLE_SIZE);
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:948:	void etc1_optimizer::compute_internal_cluster_fit(uint32_t total_perms_to_try)
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:958:		for (uint32_t i = 0; i < total_perms_to_try; i++)
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:965:			const uint8_t *pNum_selectors = g_cluster_fit_order_tab[i].m_v;
+  Per quality level, count passed in:
+			if (m_pParams->m_quality == cETCQualityFast)
+				compute_internal_cluster_fit(4);
+			else if (m_pParams->m_quality == cETCQualityMedium)
+				compute_internal_cluster_fit(16);
+			else if (m_pParams->m_quality == cETCQualitySlow)
+				compute_internal_cluster_fit(64);
+			else
+				compute_internal_cluster_fit(BASISU_ETC1_CLUSTER_FIT_ORDER_TABLE_SIZE);
+		}
+--
+
+	void etc1_optimizer::compute_internal_cluster_fit(uint32_t total_perms_to_try)
+	{
+
+--- C. Try-all 8 quantization corners ---
+Looking for explicit corner search around LS solution:
+913:		// Scan through a subset of the 3D lattice centered around the avg block color trying each 3D (555 or 444) lattice point as a potential block color.
+991:			// Try all 8 quantization-cube corners around the rounded LS solution.
+992:			// (try_all_corners enhancement, §5.2 step 3 of the report)
+993:			for (int ddr = 0; ddr <= 1; ++ddr) {
+996:				for (int ddg = 0; ddg <= 1; ++ddg) {
+999:					for (int ddb = 0; ddb <= 1; ++ddb) {
+(Our patch already lands in compute_internal_cluster_fit; verify it's there:)
+992:			// (try_all_corners enhancement, §5.2 step 3 of the report)
+993:			for (int ddr = 0; ddr <= 1; ++ddr) {
+994:				int br_t = br1 + (ddr ? -1 : 0);
+996:				for (int ddg = 0; ddg <= 1; ++ddg) {
+997:					int bg_t = bg1 + (ddg ? -1 : 0);
+999:					for (int ddb = 0; ddb <= 1; ++ddb) {
+1000:						int bb_t = bb1 + (ddb ? -1 : 0);
+
+--- D. YCoCg color-space metric ---
+  current perceptual metric weights (BT.601-ish):
+1082:			int64_t delta_l = dr * 27 + dg * 92 + db * 9;
+1083:			int64_t delta_cr = dr * 128 - delta_l;
+1084:			int64_t delta_cb = db * 128 - delta_l;
+1086:			uint32_t id = ((uint32_t)((delta_l * delta_l) >> 7U)) +
+1087:				((((uint32_t)((delta_cr * delta_cr) >> 7U)) * 26U) >> 7U) +
+1088:				((((uint32_t)((delta_cb * delta_cb) >> 7U)) * 3U) >> 7U);
+1114:			int delta_l = dr * 14 + dg * 45 + db * 5;
+1115:			int delta_cr = dr * 64 - delta_l;
+1116:			int delta_cb = db * 64 - delta_l;
+1119:			uint32_t id = ((uint32_t)(delta_l * delta_l) >> 5U) +
+
+--- E. Joint sub-block optimization in diff mode ---
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.h:978:				m_constrain_against_base_color5 = false;
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.h:993:			bool m_constrain_against_base_color5;
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:1129:		if (m_pParams->m_constrain_against_base_color5)
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:1303:		if (m_pParams->m_constrain_against_base_color5)
+  is the diff constraint applied to BOTH sub-blocks (joint) or only sub1?
+1129:		if (m_pParams->m_constrain_against_base_color5)
+1130-		{
+1131-			const int dr = (int)coords.m_unscaled_color.r - (int)m_pParams->m_base_color5.r;
+1132-			const int dg = (int)coords.m_unscaled_color.g - (int)m_pParams->m_base_color5.g;
+--
+1303:		if (m_pParams->m_constrain_against_base_color5)
+1304-		{
+1305-			const int dr = (int)coords.m_unscaled_color.r - (int)m_pParams->m_base_color5.r;
+1306-			const int dg = (int)coords.m_unscaled_color.g - (int)m_pParams->m_base_color5.g;
+
+--- F. MS-SSIM / SSIM as encode cost or final selection ---
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_enc.h:3764:		// TODO: Add ssim
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_enc.h:3766:		double m_max, m_mean, m_mean_squared, m_rms, m_psnr, m_ssim;
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_enc.h:3784:			m_ssim = 0;
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_frontend.cpp:18:// Add endpoint tiling support (where we force adjacent blocks to use the same endpoints during quantization), for a ~10% or more increase in bitrate at same SSIM. The backend already supports this.
+
+--- G. Branch-and-bound exhaustive base-color search ---
+  any 'for r=0..15' / 'for g=0..15' style enumeration?
+
+--- H. Refinement / iterative alternation ---
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.h:1099:		void refine_solution(uint32_t max_refinement_trials);
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:847:	void etc1_optimizer::refine_solution(uint32_t max_refinement_trials)
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:868:		for (uint32_t refinement_trial = 0; refinement_trial < max_refinement_trials; refinement_trial++)
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_etc.cpp:940:						refine_solution((m_pParams->m_quality == cETCQualityFast) ? 2 : (((xd | yd | zd) == 0) ? 4 : 2));
+
+--- I. Perceptual saliency / attention maps ---
+
+--- J. Dithering / pre-processing ---
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_enc.cpp:1110:						// TODO: Add dithering
+/home/romain/etc1_bench/encoders/basis_universal/encoder/basisu_enc.cpp:3714:	// Very basic global Reinhard tone mapping, output converted to sRGB with no dithering, alpha is carried through unchanged. 
+
+Audit complete.
